@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的人脉商机 · 中项网</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+/* 主页签 */
+.main-tab{padding:9px 22px;font-size:14px;font-weight:500;border-radius:6px 6px 0 0;cursor:pointer;background:#e8f1fd;color:#2563eb;border:1px solid #c7dcfa;border-bottom:none;white-space:nowrap}
+.main-tab.active{background:#2563eb;color:#fff;font-weight:600;border-color:#2563eb}
+/* 筛选页签 */
+.tab-btn{padding:5px 11px;font-size:13px;cursor:pointer;border-radius:14px;color:#6b7280;white-space:nowrap}
+.tab-btn.active{color:#fff;background:#2563eb;font-weight:600}
+.degree-1{border-left:3px solid #3b82f6}
+.degree-2{border-left:3px solid #22c55e}
+.marked-row{border-left:3px solid #f59e0b}
+.drawer{position:fixed;top:0;right:-500px;width:500px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.15);transition:right .3s ease;z-index:40;display:flex;flex-direction:column;overflow:hidden}
+.drawer.open{right:0}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:39;opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+/* 人脉路径节点 */
+.path-node{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:16px;padding:3px 10px;font-size:12px;max-width:100%}
+.path-node.me{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.path-node.contact{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+.path-node.target{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.path-arrow{font-size:11px;color:#94a3b8;white-space:nowrap}
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800 text-sm flex h-screen overflow-hidden">
+
+<!-- ===== 左侧平台导航 ===== -->
+<aside class="w-48 flex-shrink-0 bg-[#0f172a] text-white flex flex-col overflow-y-auto">
+  <div class="px-3 py-3 border-b border-slate-700">
+    <div class="text-sm font-bold text-blue-400">中项网 × SIEMENS</div>
+    <div class="text-[12px] text-slate-400 mt-0.5">智联工业·共创无限</div>
+  </div>
+  <div class="px-2 py-1.5">
+    <div class="flex items-center gap-1.5 bg-amber-600 text-white text-[12px] px-2 py-1 rounded cursor-pointer">
+      <span>⚡</span><span>智能制造专版</span><span class="ml-auto">∨</span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto py-1" id="nav-list"></nav>
+  <div class="px-3 py-2 border-t border-slate-700 flex items-center gap-2">
+    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center font-medium text-sm">李</div>
+    <div class="text-[12px] text-slate-300 leading-tight">汤维涛<br><span class="text-slate-500">尊享版</span></div>
+  </div>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+
+  <!-- ===== 顶部导航 ===== -->
+  <header class="bg-white border-b border-gray-200 flex-shrink-0">
+    <div class="flex items-center px-4 h-11 gap-4">
+      <nav class="flex gap-1 flex-1">
+        <a id="tn-proj" class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">项目信息</a>
+        <a id="tn-bid" class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">招投标</a>
+        <a id="tn-cust" class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">找客户</a>
+        <a id="tn-net" class="px-3 py-1.5 text-sm text-blue-600 font-medium border-b-2 border-blue-600 cursor-pointer">找人脉</a>
+        <a id="tn-chan" class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">找渠道</a>
+      </nav>
+      <div class="flex items-center gap-3 text-sm">
+        <button class="text-orange-500 font-medium">🔥 微信商机订阅助手</button>
+        <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">李</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== 主体 ===== -->
+  <main class="flex-1 overflow-y-auto">
+    <div id="page-my">
+    <div class="px-5 pt-4">
+
+      <!-- 设计说明条 -->
+      <div id="req-note" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 mb-3 flex items-start gap-2 text-[13px] text-blue-900 leading-relaxed">
+        <span class="font-bold flex-shrink-0">📋 设计思路：</span>
+        <span>「<b>我的人脉商机</b>」= 人脉资产 × 商机产出：<b>人脉商机</b>（默认页）看人脉解锁的项目；<b>全部人脉</b>总览联系人＋企业，顶部「可能认识的人」推荐持续补充资产。主动找人标记合作请去<b>工程人脉查询</b>大列表；全平台唯一动作「标记合作」与「我的人脉导入」统一写入资产库，系统穿透关联项目形成商机，最后加入CRM跟进。</span>
+        <button onclick="document.getElementById('req-note').style.display='none'" class="ml-auto text-blue-400 hover:text-blue-600 flex-shrink-0">收起 ×</button>
+      </div>
+
+      <!-- 数据看板 -->
+      <div class="rounded-xl overflow-hidden border border-gray-200 flex mb-3">
+        <div class="flex-1 bg-blue-900 p-3.5 flex items-center gap-4" title="统计口径：导入的人脉 ＋ 标记合作的联系人">
+          <div>
+            <div class="text-blue-200 text-[12px] mb-0.5">🔵 我的人脉（导入 ＋ 标记合作）</div>
+            <div class="text-white font-black text-2xl leading-none"><span id="stat-ppl">0</span> <span class="text-sm font-medium">人</span></div>
+            <div class="text-blue-300 text-[12px] mt-0.5">1度直接关系 · 仅您可见</div>
+          </div>
+          <div class="border-l border-blue-700 pl-4 text-[12px] text-blue-200 space-y-1">
+            <div>📍 覆盖企业 <span class="text-white font-bold" id="stat-co">0</span> 家</div>
+            <div>🔒 数据私有，绝不外泄</div>
+          </div>
+        </div>
+        <div class="w-px bg-gray-300"></div>
+        <div class="flex-1 bg-green-900 p-3.5 flex items-center gap-4">
+          <div>
+            <div class="text-green-200 text-[12px] mb-0.5">🟢 系统挖掘推荐（公域）</div>
+            <div class="text-white font-black text-2xl leading-none">1436 <span class="text-sm font-medium">人</span></div>
+            <div class="text-green-300 text-[12px] mt-0.5">2度+3度推算 · 中项网数据库</div>
+          </div>
+          <div class="border-l border-green-700 pl-4 text-[12px] text-green-200 space-y-1">
+            <div>🔗 2度关系 <span class="text-white font-bold">524人</span></div>
+            <div>🔗 3度关系 <span class="text-white font-bold">912人</span></div>
+          </div>
+        </div>
+        <div class="w-px bg-gray-300"></div>
+        <div class="bg-white p-3 flex flex-col justify-center items-center gap-2 w-40">
+          <button onclick="openModal('modal-import')" class="w-full bg-blue-600 text-white text-[13px] py-1.5 rounded font-medium hover:bg-blue-700">📥 我的人脉导入</button>
+          <button onclick="gotoSuggest()" class="w-full bg-amber-500 text-white text-[13px] py-1.5 rounded font-medium hover:bg-amber-600">➕ 标记合作认识的人</button>
+          <div class="text-[12px] text-gray-400 text-center leading-snug">导入或标记合作更多人脉<br>可解锁更多商机</div>
+        </div>
+      </div>
+
+      <!-- 主页签 -->
+      <div class="flex gap-2 items-end">
+        <div class="main-tab active" onclick="switchMainTab(this,'opp')">🔥 人脉商机 <span id="tabcnt-opp" class="opacity-80 font-normal"></span></div>
+        <div class="main-tab" onclick="switchMainTab(this,'all')">👥 全部人脉 <span id="tabcnt-all" class="opacity-80 font-normal"></span></div>
+      </div>
+    </div>
+
+    <!-- ============ 页签1：人脉商机（默认） ============ -->
+    <section id="tab-opp" class="p-5 pt-4">
+      <div class="bg-white rounded-lg border border-gray-200">
+        <div class="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 flex-wrap">
+          <button class="tab-btn active" id="oppf-all" onclick="switchOppFilter(this,'all')">全部项目</button>
+          <button class="tab-btn" id="oppf-direct" onclick="switchOppFilter(this,'direct')">🔴 直接人脉可达</button>
+          <button class="tab-btn" id="oppf-indirect" onclick="switchOppFilter(this,'indirect')">🟡 间接人脉可达</button>
+          <span class="w-px h-5 bg-gray-200 mx-1"></span>
+          <input id="opp-search" type="text" placeholder="请输入项目名称、公司名称、联系人名称" class="border border-gray-200 rounded px-2.5 py-1 text-[13px] outline-none focus:border-blue-400 w-64">
+          <span class="text-[12px] text-gray-400 ml-1">找到 <b id="opp-total" class="text-blue-600">0</b> 个结果</span>
+          <div class="ml-auto flex items-center gap-3 text-[12px] text-gray-400">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>我/我的同事</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>人脉联系人</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>目标人</span>
+          </div>
+        </div>
+        <!-- 下拉筛选行 -->
+        <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b border-gray-100 flex-wrap text-[13px]">
+          <select id="oppf-date" onchange="renderOppList()" class="border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white">
+            <option value="all">发布时间：全部</option>
+            <option value="w">近一周</option><option value="m">近一月</option><option value="q">近三月</option><option value="h">近半年</option><option value="y">近一年</option>
+          </select>
+          <select id="oppf-industry" onchange="renderOppList()" class="border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white"></select>
+          <select id="oppf-region" onchange="renderOppList()" class="border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white"></select>
+          <select id="oppf-stage" onchange="renderOppList()" class="border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white"></select>
+          <select id="oppf-invest" onchange="renderOppList()" class="border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white">
+            <option value="all">投资金额：全部</option>
+            <option value="l1">5000万以下</option><option value="l2">5000万-2亿</option><option value="l3">2亿-10亿</option><option value="l4">10亿以上</option>
+          </select>
+          <button onclick="resetOppFilters()" class="text-blue-600 hover:text-blue-800 ml-auto">清空筛选</button>
+        </div>
+        <div id="opp-list" class="divide-y divide-gray-100"></div>
+        <div class="px-4 py-2 text-[12px] text-gray-400 border-t border-gray-100">原型仅示例展示部分数据</div>
+      </div>
+    </section>
+
+    <!-- ============ 页签2：全部人脉 ============ -->
+    <section id="tab-all" class="p-5 pt-4 hidden">
+      <!-- 可能认识的人（轻量推荐条，替代原"认识的人"页签） -->
+      <div id="mayknow-bar" class="bg-white rounded-lg border border-blue-200 px-4 py-3 mb-3">
+        <div class="flex items-center mb-2 flex-wrap gap-y-1">
+          <span class="font-bold text-gray-700 text-[13px]">💡 可能认识的人</span>
+          <span class="text-[12px] text-gray-400 ml-2">最近浏览过 / 与您人脉共同参与项目的人——标记合作后转入下方资产列表</span>
+          <button onclick="rotateSuggest()" class="ml-auto text-[12px] text-blue-600 hover:text-blue-800">🔄 换一批</button>
+        </div>
+        <div id="mayknow-list" class="flex gap-2 overflow-x-auto pb-1"></div>
+      </div>
+      <div class="bg-white rounded-lg border border-gray-200">
+        <div class="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 flex-wrap">
+          <button class="tab-btn active" id="av-all" onclick="switchAllView(this,'all')">全部</button>
+          <span class="text-[11px] text-gray-400 ml-1">类型</span>
+          <button class="tab-btn" id="av-contact" onclick="switchAllView(this,'contact')">👤 联系人</button>
+          <button class="tab-btn" id="av-company" onclick="switchAllView(this,'company')">🏢 公司</button>
+          <span class="w-px h-5 bg-gray-200 mx-1"></span>
+          <span class="text-[11px] text-gray-400">来源</span>
+          <button class="tab-btn" id="av-private" onclick="switchAllView(this,'private')">🔒 私域导入</button>
+          <button class="tab-btn" id="av-coop" onclick="switchAllView(this,'coop')">🤝 已合作</button>
+          <button class="tab-btn" id="av-rec" onclick="switchAllView(this,'rec')">🟢 系统推荐</button>
+          <input id="all-search" type="text" placeholder="搜索姓名、公司..." class="border border-gray-200 rounded px-2.5 py-1 text-[13px] outline-none focus:border-blue-400 w-44">
+          <button onclick="renderAllList()" class="bg-blue-600 text-white text-[13px] px-3 py-1 rounded hover:bg-blue-700">搜索</button>
+        </div>
+        <div class="px-4 py-2 bg-amber-50 border-b border-amber-100 text-[12px] text-amber-800">
+          这里是你所有关系的总览：<b>👤联系人</b>和<b>🏢公司</b>在一起管理，按关系价值排序（<b>已合作 ＞ 私域导入 ＞ 系统推荐</b>，同组内解锁项目多者优先）——点击公司行可展开它解锁的项目。
+        </div>
+        <div id="all-list" class="divide-y divide-gray-50"></div>
+      </div>
+    </section>
+
+    </div><!-- /page-my -->
+
+    <!-- ===== 场景演示页（真实页面模拟） ===== -->
+    <div id="page-scene" class="hidden">
+      <div class="mx-5 mt-4 bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-2 flex items-center gap-2 text-[13px] text-indigo-900">
+        <span class="font-bold flex-shrink-0">🎬 场景演示</span>
+        <span id="scene-banner-text"></span>
+        <button onclick="backToMy()" class="ml-auto flex-shrink-0 bg-indigo-600 text-white text-[12px] px-3 py-1 rounded hover:bg-indigo-700">← 返回我的人脉商机</button>
+      </div>
+      <div id="scene-project" class="p-5 pt-3 hidden"></div>
+      <div id="scene-company" class="p-5 pt-3 hidden"></div>
+      <div id="scene-contacts" class="p-5 pt-3 hidden"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== 导入向导弹窗 ===== -->
+<div id="modal-import" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl w-[560px] max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200" style="background:linear-gradient(135deg,#0f172a,#1e3a5f)">
+      <div>
+        <div class="text-white font-bold text-sm">📥 导入联系人（向导 1/1）</div>
+        <div class="text-slate-400 text-[12px] mt-0.5">私域数据安全隔离，仅您可见，绝不被竞对检索</div>
+      </div>
+      <button onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white text-xl">×</button>
+    </div>
+    <div class="mx-4 mt-4 bg-green-50 border border-green-300 rounded-xl p-3 flex gap-3">
+      <span class="text-2xl flex-shrink-0">🛡️</span>
+      <div>
+        <div class="text-sm font-bold text-green-800 mb-1">数据安全承诺</div>
+        <div class="text-[13px] text-green-700 leading-relaxed space-y-0.5">
+          <div>✅ <b>数据安全隔离</b>：您的人脉数据存储在专属加密空间，与其他用户完全隔离</div>
+          <div>✅ <b>100% 私域化</b>：导入的联系人仅您本人账号可见，任何人无法访问</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 space-y-3">
+      <div class="text-[12px] text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+        <span class="text-red-500 font-medium">* 必填</span>：姓名、所在企业、手机号与微信号至少填写一项
+      </div>
+      <div id="manual-form" class="space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <input id="m-name" type="text" placeholder="姓名 *" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <input id="m-title" type="text" placeholder="职位（如：采购经理）" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input id="m-phone" type="text" placeholder="手机号 *" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <input id="m-wechat" type="text" placeholder="微信号" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+        </div>
+        <div class="flex gap-2">
+          <input id="m-company" type="text" placeholder="所在企业 *" autocomplete="off" class="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <button onclick="onManualCompanyInput(document.getElementById('m-company').value)" class="bg-blue-500 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-600 whitespace-nowrap">匹配</button>
+        </div>
+        <div id="m-match-panel" class="hidden rounded-lg border text-[13px] p-2"></div>
+        <button onclick="submitManual()" class="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700">添加联系人</button>
+      </div>
+      <div id="manual-result" class="hidden rounded-lg border p-3 text-[13px]"></div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[12px] font-medium text-gray-500">已导入私域人脉（3人）</span>
+          <span class="text-[12px] text-red-400 cursor-pointer hover:text-red-600" onclick="confirmPurge()">🗑 清除全部数据</span>
+        </div>
+        <div class="flex gap-3 mb-2 text-[12px]">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>已关联公域数据（可参与图谱推算）</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>待确认（纯私域，暂不参与推算）</span>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[12px] font-bold flex-shrink-0">夏</span><span class="font-medium text-gray-700">夏旭忆</span><span class="text-gray-400 flex-1">湖南攸县抽水蓄能有限公司</span><span class="text-green-600 text-[12px]">✅ 已关联 1个项目</span></div>
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[12px] font-bold flex-shrink-0">李</span><span class="font-medium text-gray-700">李忠孝</span><span class="text-gray-400 flex-1">大唐三门峡发电有限责任公司</span><span class="text-green-600 text-[12px]">✅ 已关联 2个项目</span></div>
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-[12px] font-bold flex-shrink-0">董</span><span class="font-medium text-gray-700">董雯婷</span><span class="text-gray-400 flex-1">江苏华电昆山热电有限公司</span><span class="text-orange-500 text-[12px]">⚠️ 企业待确认</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 商机穿透抽屉 ===== -->
+<div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="contact-drawer" class="drawer">
+  <div class="flex-shrink-0" style="background:linear-gradient(135deg,#0f172a,#1e3a5f)">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div>
+        <div id="drawer-name" class="text-white font-bold text-sm"></div>
+        <div id="drawer-sub" class="text-slate-400 text-[12px] mt-0.5"></div>
+      </div>
+      <button onclick="closeDrawer()" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+    </div>
+    <div class="px-4 pb-2 pt-1 border-t border-slate-700 text-[13px] font-medium text-blue-400">🎯 商机穿透</div>
+  </div>
+  <div class="flex-1 overflow-y-auto p-4 space-y-3">
+    <div>
+      <div class="text-sm font-bold text-gray-700 mb-2">🔗 关系穿透路径</div>
+      <div id="drawer-path" class="bg-slate-50 rounded-xl border border-gray-200 p-3 flex items-center flex-wrap gap-1.5"></div>
+    </div>
+    <div id="drawer-via-block" class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800"></div>
+    <div class="text-sm font-bold text-gray-700">🎯 关联项目与穿透价值</div>
+    <div id="drawer-projects" class="space-y-2"></div>
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[13px] text-amber-800">
+      <div class="font-semibold mb-1">💡 穿透策略</div>
+      <div id="drawer-tip"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm z-[60] opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+<div id="jump-pill" onclick="jumpToMyAll()" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-600 text-white text-[13px] px-4 py-2 rounded-full shadow-lg cursor-pointer z-50 hover:bg-green-700">✅ 已写入我的人脉资产 · 点击查看 →</div>
+
+<!-- 场景演示悬浮入口 -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+  <div id="scene-menu" class="hidden bg-white border border-gray-200 rounded-xl shadow-xl p-2 w-72">
+    <div class="text-[12px] text-gray-400 px-2 py-1">🎬 选择要演示的真实场景</div>
+    <button onclick="openScene('project');toggleSceneMenu()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-[13px] text-gray-700">🏗️ 项目详情 · 项目联系人<span class="block text-[11px] text-gray-400">参与单位/联系人卡片上标记合作</span></button>
+    <button onclick="openScene('company');toggleSceneMenu()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-[13px] text-gray-700">🏢 企业详情 · 找客户<span class="block text-[11px] text-gray-400">头部企业级标记合作</span></button>
+    <button onclick="openScene('contacts');toggleSceneMenu()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-[13px] text-gray-700">👥 工程人脉查询 · 联系人列表<span class="block text-[11px] text-gray-400">直接标记合作 + 标记状态筛选回流</span></button>
+  </div>
+  <button onclick="toggleSceneMenu()" class="bg-indigo-600 text-white w-13 h-13 px-4 py-3 rounded-full shadow-lg hover:bg-indigo-700 text-lg flex items-center justify-center" title="真实场景演示">🎬</button>
+</div>
+
+<script>
+/* ================= 平台侧边导航 ================= */
+const NAV_ITEMS = [
+  {label:"找商机", icon:"🔍", sub:[]},
+  {label:"找客户", icon:"🏢", sub:[]},
+  {label:"找人脉", icon:"👥", sub:["工程人脉查询","找更多联系人","我的人脉商机"]},
+  {label:"找渠道", icon:"📡", sub:[]},
+  {label:"目标商机", icon:"🎯", sub:[]},
+  {label:"海外商机", icon:"🌏", sub:[]},
+  {label:"CRM", icon:"📋", sub:[]},
+  {label:"市场服务", icon:"📊", sub:[]},
+  {label:"行业研究院", icon:"🏛", sub:[]},
+];
+function renderNav(topLabel='找人脉', subLabel='我的人脉商机'){
+  document.getElementById('nav-list').innerHTML = NAV_ITEMS.map(item => `
+    <div class="cursor-pointer">
+      <div class="flex items-center gap-2 px-3 py-2 text-sm ${item.label===topLabel?'text-blue-400 bg-slate-800':'text-slate-300 hover:bg-slate-800 hover:text-blue-400'}">
+        <span>${item.icon}</span><span>${item.label}</span>
+        ${item.sub.length?'<span class="ml-auto text-slate-500 text-[11px]">∨</span>':''}
+      </div>
+      ${item.label==='找人脉'&&topLabel==='找人脉'? item.sub.map(s=>`
+        <div class="pl-9 py-1.5 text-[13px] cursor-pointer ${s===subLabel?'text-blue-400 bg-slate-800/60 font-medium border-l-2 border-blue-400':'text-slate-400 hover:text-blue-400'}">${s}${s==='我的人脉商机'?' <span class="text-[10px] text-amber-400 align-middle">新</span>':''}</div>
+      `).join(''):''}
+    </div>
+  `).join('');
+}
+renderNav();
+
+/* ================= 数据 ================= */
+/* 人脉资产：联系人 source: private私域导入 / coop已合作(标记合作) / rec系统推荐 */
+let CONTACTS = [
+  {id:1,name:"夏旭忆",title:"现场负责人",company:"湖南攸县抽水蓄能有限公司",source:"private",degree:1,avatar:"夏",remark:"",
+   via:"直接联系人（私域导入）· 导入账号 151****7366",path:["我","夏旭忆"],
+   projects:[{name:"攸县广寒坪抽水蓄能电站项目",stage:"设备安装",role:"现场负责人",match:75}],
+   tip:"夏旭忆是攸县抽蓄现场负责人，可直接获取业主侧设备采购进展，建议以技术交流切入。"},
+  {id:2,name:"李忠孝",title:"项目经理",company:"大唐三门峡发电有限责任公司",source:"private",degree:1,avatar:"李",remark:"已合作过三期项目",
+   via:"直接联系人（私域导入）· 导入账号 151****7366",path:["我","李忠孝"],
+   projects:[{name:"大唐三门峡火电厂扩建第二台1000MW机组（三期）项目",stage:"设备安装",role:"采购参与",match:68},
+             {name:"大唐湖滨区磁钟风电项目",stage:"施工图设计",role:"采购参与",match:45}],
+   tip:"李忠孝覆盖大唐三门峡扩建与风电两个项目，建议捆绑提供辅机设备方案。"},
+  {id:3,name:"董雯婷",title:"采购主管",company:"江苏华电昆山热电有限公司",source:"private",degree:1,avatar:"董",remark:"",
+   via:"直接联系人（私域导入）· 导入账号 151****7366",path:["我","董雯婷"],
+   projects:[{name:"江苏华电昆山二期2×45万千瓦级燃机调峰项目",stage:"初步设计",role:"采购主管",match:36}],
+   tip:"董雯婷所在企业信息待确认，补全后可参与图谱推算。"},
+  {id:4,name:"乐宜洲",title:"经理 · 生产部",company:"盐城市申克赛斯机械有限公司",source:"coop",degree:1,avatar:"乐",remark:"",markedDate:"2026-06-09",
+   via:"标记合作 · 2026-06-09 · 来源：年产50台套锅炉及环保设备项目",path:["我","乐宜洲"],
+   projects:[{name:"年产50台套锅炉及环保设备项目",stage:"封顶后分包及装修工程",role:"业主/开发商",match:82}],
+   tip:"乐宜洲为已合作关系，其名下锅炉项目与本公司产品线高度契合。"},
+  {id:5,name:"王卓",title:"设计总监",company:"杭州九米建筑设计有限公司",source:"coop",degree:1,avatar:"王",remark:"绿城系设计资源，重点维护",coop:"义乌市城西街道新社区集聚开创二期项目",markedDate:"2026-09-09",
+   via:"标记合作 · 2026-09-09 · 来源：义乌市城西街道新社区集聚开创二期项目",path:["我","王卓"],
+   projects:[{name:"义乌市城西街道新社区集聚开创二期项目",stage:"工程施工",role:"设计负责人",match:78}],
+   tip:"王卓所在九米设计隶属绿城系，可穿透浙江区域住宅项目设计入口。"},
+  {id:6,name:"甘先生",title:"工程部",company:"湖南攸县抽水蓄能有限公司",source:"rec",degree:2,avatar:"甘",remark:"",
+   via:"通过 → 夏旭忆（湖南攸县抽水蓄能有限公司）引荐",path:["我","夏旭忆","甘先生"],
+   projects:[{name:"攸县广寒坪抽水蓄能电站项目",stage:"设备安装",role:"工程部参与",match:58}],
+   tip:"通过私域人脉夏旭忆引荐可达，建议先请夏旭忆牵线再发起接触。"},
+  {id:7,name:"李明",title:"采购总监",company:"国网新源控股",source:"rec",degree:2,avatar:"李",remark:"",
+   via:"通过 → 夏旭忆（攸县抽蓄）→ 项目合作方引荐",path:["我","夏旭忆","李明"],
+   projects:[{name:"仙游抽水蓄能电站",stage:"设备安装",role:"业主采购参与",match:71}],
+   tip:"国网新源体系采购关键人，覆盖多个抽蓄项目，值得重点经营。"},
+  {id:8,name:"陈总",title:"副总经理",company:"中国电建华东院",source:"rec",degree:2,avatar:"陈",remark:"",
+   via:"通过 → 李忠孝（大唐三门峡）→ 设计合作引荐",path:["我","李忠孝","陈总"],
+   projects:[{name:"多个抽蓄项目设计",stage:"设计阶段",role:"总负责",match:66}],
+   tip:"华东院承担多个抽蓄项目设计，提前介入可将技术参数写入规范。"},
+  {id:9,name:"王海",title:"项目负责人",company:"射阳县特庸镇人民政府",source:"rec",degree:3,avatar:"王",remark:"",
+   via:"通过 → 乐宜洲（申克赛斯）→ 合作过 → 王海",path:["我","乐宜洲","王海"],
+   projects:[{name:"年产200台智能粮食烘干机制造项目",stage:"封顶后分包及装修工程",role:"业主/开发商",match:52}],
+   tip:"3度关系，建议先通过乐宜洲引荐建立直接联系。"},
+  {id:10,name:"赵工",title:"技术主任",company:"PT PLN",source:"rec",degree:3,avatar:"赵",remark:"",
+   via:"通过 → 陈总（华东院）→ 葛洲坝合作方",path:["我","陈总","赵工"],
+   projects:[{name:"上西索凯抽水蓄能电站",stage:"土建施工",role:"业主技术主任",match:48}],
+   tip:"海外业主方技术主任，路径较长，建议借设计院渠道间接影响。"},
+];
+const srcConf = {
+  private:{label:'🔒 私域·1度',cls:'bg-blue-50 border-blue-200 text-blue-700',row:'degree-1'},
+  coop:{label:'🤝 已合作',cls:'bg-red-50 border-red-200 text-red-700',row:'marked-row'},
+  rec:{label:'🟢 系统推荐',cls:'bg-green-50 border-green-200 text-green-700',row:'degree-2'},
+};
+
+/* 人脉资产：公司（与联系人同图） */
+let COMPANIES = [
+  {id:1,type:'company',name:"杭州九米建筑设计有限公司",alias:"又名：杭州绿城九米建筑设计有限公司",group:"隶属于：绿城",source:"coop",markedDate:"2026-09-09",remark:"此公司已合作",coop:"义乌市城西街道新社区集聚开创二期项目",total:156,
+   projects:[
+     {direct:true,name:"义乌市城西街道新社区集聚开创二期项目 (义乌自由贸易发展区管理委员会) v.10",date:"2026-09-09",region:"浙江省/金华市",stage:"工程施工",industry:"住宅/停车场",
+      path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"}],
+      notes:["我标记合作过「杭州九米建筑设计有限公司」的联系人「王卓 先生」","「王卓 先生」参与本项目设计"]},
+     {direct:true,name:"北苑街道国贸大道与丹溪北路交叉口西北侧地块房地产项目 (义乌市绣湖置业有限公司) v.6",date:"2026-09-08",region:"浙江省/金华市",stage:"工程施工",industry:"住宅/停车场",
+      path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"}],
+      notes:["我标记合作过「杭州九米建筑设计有限公司」的联系人「王卓 先生」","「王卓 先生」参与本项目设计"]},
+     {direct:false,name:"浙江省人才大厦项目 (杭州未来科技城资产管理有限公司) v.15",date:"2026-09-09",region:"浙江省/杭州市",stage:"封顶后分包及装修工程",industry:"办公楼/停车场",
+      path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"},{t:"target",label:"李菁 女士",sub:"杭州未来科技城资产管理有限公司",edge:"合作过"}],
+      notes:["「王卓 先生」与「李菁 女士」共同参与过项目","「李菁 女士」为本项目的业主 / 开发商"]},
+     {direct:false,name:"杭钢单元GS1304-03地块公共租赁房项目(EPC) (杭州运河集团建设管理有限公司) v.12",date:"2026-09-08",region:"浙江省/杭州市",stage:"封顶后分包及装修工程",industry:"住宅/社区/停车场/医疗",
+      path:[{t:"me",label:"我"},{t:"contact",label:"顾信平 先生",sub:"杭州九米建筑设计有限公司",edge:"已合作"},{t:"target",label:"周敏 女士",sub:"杭州运河集团建设管理有限公司",edge:"合作过"}],
+      notes:["「顾信平 先生」与「周敏 女士」共同参与过项目","「周敏 女士」为本项目的业主 / 开发商"]},
+   ]},
+  {id:2,type:'company',name:"上海裕目商业管理有限公司",alias:"",group:"",source:"coop",markedDate:"2025-08-18",remark:"",coop:"虹口喜来登酒店翻新装修工程（EPC）",total:37,
+   projects:[
+     {direct:true,name:"虹口喜来登酒店4层局部、6-15层局部翻新装修工程（EPC）（五星级） (上海裕目商业管理有限公司) v.2",date:"2026-07-28",region:"上海市/虹口区",stage:"封顶后分包及装修工程",industry:"酒店",
+      path:[{t:"me",label:"我"},{t:"contact",label:"吴晓东 先生 · 工程总监",sub:"上海裕目商业管理有限公司",edge:"已合作"}],
+      notes:["我标记合作过「上海裕目商业管理有限公司」的联系人「吴晓东 先生」","「吴晓东 先生」为本项目的业主 / 开发商"]},
+     {direct:false,name:"上海长航大厦西座改造酒店项目(四星级酒店) (上海江海建设开发有限公司) v.8",date:"2026-09-07",region:"上海市/浦东新区",stage:"封顶后分包及装修工程",industry:"酒店",
+      path:[{t:"me",label:"我"},{t:"contact",label:"吴晓东 先生 · 工程总监",sub:"上海裕目商业管理有限公司",edge:"已合作"},{t:"target",label:"郑立 先生",sub:"上海江海建设开发有限公司",edge:"合作过"}],
+      notes:["「吴晓东 先生」与「郑立 先生」共同参与过项目","「郑立 先生」为本项目的业主 / 开发商"]},
+   ]},
+];
+
+/* 人脉解锁的商机（产出） */
+let OPPORTUNITIES = [
+  {id:1,direct:true,deps:["王卓"],depCompanies:["杭州九米建筑设计有限公司"],
+   title:"义乌市城西街道新社区集聚开创二期项目",invest:"98000万",owner:"义乌自由贸易发展区管理委员会",ver:"v.10",date:"2026-09-09",region:"浙江省/金华市",stage:"工程施工",industry:"住宅/停车场",
+   path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"}],
+   notes:["我标记合作过「王卓 先生」","「王卓 先生」为本项目的设计方负责人"]},
+  {id:2,direct:true,deps:["王卓"],depCompanies:["杭州九米建筑设计有限公司"],
+   title:"北苑街道国贸大道与丹溪北路交叉口西北侧地块房地产项目",invest:"76000万",owner:"义乌市绣湖置业有限公司",ver:"v.6",date:"2026-09-08",region:"浙江省/金华市",stage:"工程施工",industry:"住宅/停车场",
+   path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"}],
+   notes:["我标记合作过「王卓 先生」","「王卓 先生」参与本项目设计"]},
+  {id:3,direct:true,deps:["夏旭忆"],depCompanies:[],
+   title:"攸县广寒坪抽水蓄能电站项目",invest:"760000万",owner:"湖南攸县抽水蓄能有限公司",ver:"v.16",date:"2026-09-09",region:"湖南省/株洲市",stage:"设备安装",industry:"水利水电",
+   path:[{t:"me",label:"我"},{t:"contact",label:"夏旭忆 · 现场负责人",sub:"湖南攸县抽水蓄能有限公司",edge:"私域导入"}],
+   notes:["我导入过「夏旭忆」为私域人脉","「夏旭忆」为本项目现场负责人"]},
+  {id:4,direct:true,deps:["乐宜洲"],depCompanies:[],
+   title:"年产50台套锅炉及环保设备项目",invest:"12000万",owner:"盐城市申克赛斯机械有限公司",ver:"v.1",date:"2026-08-17",region:"江苏省/盐城市",stage:"封顶后分包及装修工程",industry:"工业",
+   path:[{t:"me",label:"我"},{t:"contact",label:"乐宜洲 先生（经理）· 生产部",sub:"盐城市申克赛斯机械有限公司",edge:"已合作"}],
+   notes:["我标记合作过「乐宜洲 先生」","「乐宜洲 先生」为本项目的业主 / 开发商"]},
+  {id:5,direct:true,deps:["吴晓东"],depCompanies:["上海裕目商业管理有限公司"],
+   title:"虹口喜来登酒店4层局部、6-15层局部翻新装修工程（EPC）（五星级）",invest:"8500万",owner:"上海裕目商业管理有限公司",ver:"v.2",date:"2026-07-28",region:"上海市/虹口区",stage:"封顶后分包及装修工程",industry:"酒店",
+   path:[{t:"me",label:"我"},{t:"contact",label:"吴晓东 先生 · 工程总监",sub:"上海裕目商业管理有限公司",edge:"已合作"}],
+   notes:["我标记合作过「上海裕目商业管理有限公司」及其联系人「吴晓东 先生」","「吴晓东 先生」为本项目的业主 / 开发商"]},
+  {id:6,direct:false,deps:["王卓","李菁"],depCompanies:["杭州九米建筑设计有限公司"],
+   title:"浙江省人才大厦项目",invest:"135000万",owner:"杭州未来科技城资产管理有限公司",ver:"v.15",date:"2026-09-09",region:"浙江省/杭州市",stage:"封顶后分包及装修工程",industry:"办公楼/停车场",
+   path:[{t:"me",label:"我"},{t:"contact",label:"王卓 先生 · 设计总监",sub:"杭州九米建筑设计有限公司",edge:"已合作"},{t:"target",label:"李菁 女士",sub:"杭州未来科技城资产管理有限公司",edge:"合作过"}],
+   notes:["「王卓 先生」与「李菁 女士」共同参与过项目：「义乌市城西街道新社区集聚开创二期项目」","「李菁 女士」为本项目的业主 / 开发商"]},
+  {id:7,direct:false,deps:["乐宜洲","王海"],depCompanies:[],
+   title:"年产200台智能粮食烘干机制造项目",invest:"8000万",owner:"盐城舒圣达科技有限公司",ver:"v.1",date:"2026-04-10",region:"江苏省/盐城市",stage:"封顶后分包及装修工程",industry:"工业",
+   path:[{t:"me",label:"我"},{t:"contact",label:"乐宜洲 先生（经理）· 生产部",sub:"盐城市申克赛斯机械有限公司",edge:"已合作"},{t:"target",label:"王海 先生",sub:"射阳县特庸镇人民政府",edge:"合作过"}],
+   notes:["「乐宜洲 先生」与「王海 先生」共同参与过项目：「年产50台套锅炉及环保设备项目」","「王海 先生」为本项目的业主 / 开发商"]},
+  {id:8,direct:false,deps:["顾信平","周敏"],depCompanies:["杭州九米建筑设计有限公司"],
+   title:"杭钢单元GS1304-03地块公共租赁房项目(EPC)",invest:"58000万",owner:"杭州运河集团建设管理有限公司",ver:"v.12",date:"2026-09-08",region:"浙江省/杭州市",stage:"封顶后分包及装修工程",industry:"住宅/社区/停车场/医疗",
+   path:[{t:"me",label:"我"},{t:"contact",label:"顾信平 先生",sub:"杭州九米建筑设计有限公司",edge:"已合作"},{t:"target",label:"周敏 女士",sub:"杭州运河集团建设管理有限公司",edge:"合作过"}],
+   notes:["「顾信平 先生」与「周敏 女士」共同参与过项目","「周敏 女士」为本项目的业主 / 开发商"]},
+  {id:9,direct:false,deps:["吴晓东","郑立"],depCompanies:["上海裕目商业管理有限公司"],
+   title:"上海长航大厦西座改造酒店项目(四星级酒店)",invest:"22000万",owner:"上海江海建设开发有限公司",ver:"v.8",date:"2026-09-07",region:"上海市/浦东新区",stage:"封顶后分包及装修工程",industry:"酒店",
+   path:[{t:"me",label:"我"},{t:"contact",label:"吴晓东 先生 · 工程总监",sub:"上海裕目商业管理有限公司",edge:"已合作"},{t:"target",label:"郑立 先生",sub:"上海江海建设开发有限公司",edge:"合作过"}],
+   notes:["「吴晓东 先生」与「郑立 先生」共同参与过项目","「郑立 先生」为本项目的业主 / 开发商"]},
+];
+
+/* 认识的人（增长池） */
+let SUGGEST_POOL = [
+  {id:101,kind:'recent',type:'contact',name:"王丽杰",company:"上海凯灵机电设备工程安装有限公司",region:"上海"},
+  {id:102,kind:'recent',type:'contact',name:"王丽英",company:"上海驯鹿生物技术有限公司",region:"上海"},
+  {id:103,kind:'recent',type:'contact',name:"王丽华",company:"浙江联建工程设计有限公司",region:"浙江省"},
+  {id:104,kind:'recent',type:'company',name:"杭州鸿准置业有限公司",company:"前滩52地块楼宇更新项目 业主方",region:"上海"},
+  {id:105,kind:'recent',type:'contact',name:"吉伯军",company:"苏州金螳螂建筑装饰股份有限公司",region:"江苏省"},
+  {id:106,kind:'recent',type:'contact',name:"施远惠",company:"北京金碧合力建筑设计工程有限公司",region:"上海"},
+  {id:201,kind:'coproject',type:'contact',name:"李菁",company:"杭州未来科技城资产管理有限公司",region:"浙江省",reason:"与 王卓 共同参与过「义乌市城西街道新社区集聚开创二期项目」"},
+  {id:202,kind:'coproject',type:'contact',name:"周敏",company:"杭州运河集团建设管理有限公司",region:"浙江省",reason:"与 顾信平（九米设计）共同参与过公共租赁房项目"},
+  {id:203,kind:'coproject',type:'contact',name:"郑立",company:"上海江海建设开发有限公司",region:"上海",reason:"与 吴晓东（裕目商业）共同参与过长航大厦改造项目"},
+  {id:204,kind:'coproject',type:'contact',name:"谭斌",company:"上海新丽装饰工程有限公司",region:"上海",reason:"与 顾信平（九米设计）合作过「前滩52地块楼宇更新项目」"},
+];
+let sgOffset = 0;
+
+/* ================= 资产条 & 主页签 ================= */
+function updateStats(){
+  const mine = CONTACTS.filter(c=>c.source!=='rec');
+  const cos = new Set(mine.map(c=>c.company));
+  COMPANIES.forEach(co=>cos.add(co.name));
+  document.getElementById('stat-ppl').textContent = mine.length;
+  document.getElementById('stat-co').textContent = cos.size;
+  document.getElementById('tabcnt-opp').textContent = `(${OPPORTUNITIES.length})`;
+  document.getElementById('tabcnt-all').textContent = `(${mine.length + COMPANIES.length})`;
+}
+function switchMainTab(el, tab){
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['opp','all'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+  });
+}
+/* 「标记合作认识的人」→ 进入工程人脉查询大列表（搜索+标记合作） */
+function gotoSuggest(){
+  openScene('contacts');
+}
+
+/* ================= 页签1：人脉商机 ================= */
+let oppFilter = 'all';
+function switchOppFilter(el, f){
+  oppFilter = f;
+  document.querySelectorAll('#tab-opp .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderOppList();
+}
+/* 下拉筛选：行业/地区/项目阶段选项从数据生成 */
+(function initOppFilters(){
+  const fill = (id, label, list) => {
+    document.getElementById(id).innerHTML =
+      `<option value="all">${label}：全部</option>` + list.map(v=>`<option value="${v}">${v}</option>`).join('');
+  };
+  const industries = [...new Set(OPPORTUNITIES.flatMap(o=>(o.industry||'').split('/').filter(Boolean)))].sort();
+  const regions = [...new Set(OPPORTUNITIES.map(o=>(o.region||'').split('/')[0]).filter(Boolean))].sort();
+  const stages = [...new Set(OPPORTUNITIES.map(o=>o.stage).filter(Boolean))];
+  fill('oppf-industry','行业',industries);
+  fill('oppf-region','地区',regions);
+  fill('oppf-stage','项目阶段',stages);
+})();
+function _oppMaxDate(){ return OPPORTUNITIES.reduce((m,o)=>o.date>m?o.date:m,''); }
+function _dateShift(d,days){ const t=new Date(d+'T00:00:00'); t.setDate(t.getDate()-days);
+  const p=n=>String(n).padStart(2,'0'); return t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate()); }
+function _invNum(v){ const m=/([\d.]+)万/.exec(v||''); return m?parseFloat(m[1]):null; }
+function filteredOpps(){
+  const kw = (document.getElementById('opp-search').value||'').trim().toLowerCase();
+  const fdate = document.getElementById('oppf-date').value;
+  const findu = document.getElementById('oppf-industry').value;
+  const freg  = document.getElementById('oppf-region').value;
+  const fstg  = document.getElementById('oppf-stage').value;
+  const finv  = document.getElementById('oppf-invest').value;
+  const days = {w:7,m:30,q:90,h:183,y:365}[fdate];
+  const cutoff = days ? _dateShift(_oppMaxDate(),days) : '';
+  const invRange = finv==='l1'?[0,5000]:finv==='l2'?[5000,20000]:finv==='l3'?[20000,100000]:finv==='l4'?[100000,Infinity]:null;
+  return OPPORTUNITIES.filter(o=>{
+    if (oppFilter!=='all' && (oppFilter==='direct')!==o.direct) return false;
+    if (kw && !(o.title+o.owner+o.path.map(n=>n.label).join('')).toLowerCase().includes(kw)) return false;
+    if (cutoff && !(o.date>=cutoff)) return false;
+    if (findu!=='all' && !(o.industry||'').includes(findu)) return false;
+    if (freg!=='all' && !(o.region||'').startsWith(freg)) return false;
+    if (fstg!=='all' && o.stage!==fstg) return false;
+    if (invRange){ const n=_invNum(o.invest); if (n===null || n<invRange[0] || n>=invRange[1]) return false; }
+    return true;
+  });
+}
+function resetOppFilters(){
+  ['oppf-date','oppf-industry','oppf-region','oppf-stage','oppf-invest'].forEach(id=>document.getElementById(id).value='all');
+  document.getElementById('opp-search').value='';
+  renderOppList();
+  showToast('已清空筛选条件');
+}
+function renderOppList(){
+  const list = filteredOpps();
+  document.getElementById('opp-total').textContent = list.length;
+  document.getElementById('opp-list').innerHTML = list.length ? list.map(o=>oppCard(o)).join('')
+    : `<div class="p-12 text-center">
+        <div class="text-4xl mb-3">🔗</div>
+        <div class="text-gray-500 mb-1">暂无人脉解锁的项目</div>
+        <div class="text-[13px] text-gray-400 mb-4">标记合作或导入您认识的人，系统将自动穿透其关联项目</div>
+        <button onclick="gotoSuggest()" class="bg-amber-500 text-white text-sm px-4 py-1.5 rounded hover:bg-amber-600">➕ 去标记合作</button>
+       </div>`;
+}
+function oppCard(o){
+  const tag = o.direct
+    ? `<span class="text-[12px] bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded font-medium flex-shrink-0">直接人脉</span>`
+    : `<span class="text-[12px] bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded font-medium flex-shrink-0">间接人脉</span>`;
+  const coopBadge = o.path.some(n=>n.edge==='已合作')
+    ? '<span class="text-[12px] bg-rose-600 text-white px-1.5 py-0.5 rounded font-medium flex-shrink-0">🤝 合作路径</span>' : '';
+  return `<div class="p-3.5 hover:bg-blue-50/40 transition-all">
+    <div class="flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start gap-2">
+          ${tag}${coopBadge}
+          <div class="text-[14px] font-medium text-gray-800 leading-snug hover:text-blue-700 cursor-pointer flex-1">${o.title} <span class="text-gray-400 font-normal">(${o.owner}) ${o.ver}</span></div>
+        </div>
+        <div class="flex gap-3 flex-wrap text-[12px] text-gray-500 mt-1.5">
+          <span>发布时间：${o.date}</span><span>${o.region}</span><span>项目阶段：${o.stage}</span><span>行业分类：${o.industry}</span><span>投资额：${o.invest||'—'}</span>
+        </div>
+        <div class="mt-2 bg-slate-50 border border-gray-100 rounded-lg px-3 py-2">
+          <div class="flex items-center flex-wrap gap-1.5">
+            ${o.path.map((n,j)=>`
+              ${j>0?`<span class="path-arrow">—${n.edge||'引荐'}→</span>`:''}
+              <span class="path-node ${n.t}"><span class="w-2 h-2 rounded-full ${n.t==='me'?'bg-blue-500':n.t==='contact'?'bg-orange-400':'bg-green-500'} inline-block"></span>${n.label}${n.sub?`<span class="text-gray-400">· ${n.sub}</span>`:''}</span>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5 flex-shrink-0">
+        <button onclick="showToast('原型演示：进入项目详情')" class="text-[12px] bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700 whitespace-nowrap">查看详情</button>
+        <button onclick="toggleFav(${o.id})" class="text-[12px] border px-2.5 py-1 rounded whitespace-nowrap ${FAVS.has(o.id)?'border-amber-300 bg-amber-50 text-amber-600':'border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600'}">${FAVS.has(o.id)?'★ 已收藏':'☆ 收藏'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+let FAVS = new Set();
+function toggleFav(id){
+  if (FAVS.has(id)){ FAVS.delete(id); showToast('已取消收藏'); }
+  else { FAVS.add(id); showToast('⭐ 已收藏该项目'); }
+  renderOppList();
+}
+
+/* ================= 页签2：全部人脉（联系人+公司同图） ================= */
+let allView = 'all';
+let expandedCo = null;
+function switchAllView(el, v){
+  allView = v;
+  document.querySelectorAll('#tab-all .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderAllList();
+}
+function renderAllList(){
+  const kw = (document.getElementById('all-search').value||'').trim().toLowerCase();
+  const kwC  = CONTACTS.filter(c=>!kw||(c.name+c.company+c.title).toLowerCase().includes(kw));
+  const kwCo = COMPANIES.filter(co=>!kw||(co.name+(co.alias||'')).toLowerCase().includes(kw));
+  // 单选筛选：来源（私域/已合作/推荐）或类型（联系人/公司）
+  const inView = (item, kind) => allView==='all' ? true
+    : allView==='contact' ? kind==='contact'
+    : allView==='company' ? kind==='company'
+    : item.source===allView;
+  const contacts  = kwC.filter(c=>inView(c,'contact')).map(c=>({kind:'contact',data:c}));
+  const companies = kwCo.filter(co=>inView(co,'company')).map(co=>({kind:'company',data:co}));
+  const cnt = id => document.getElementById(id);
+  cnt('av-all').innerHTML = `全部 (${kwC.length+kwCo.length})`;
+  cnt('av-private').innerHTML = `🔒 私域导入 (${kwC.filter(c=>c.source==='private').length + kwCo.filter(c=>c.source==='private').length})`;
+  cnt('av-coop').innerHTML = `🤝 已合作 (${kwC.filter(c=>c.source==='coop').length + kwCo.filter(c=>c.source==='coop').length})`;
+  cnt('av-rec').innerHTML = `🟢 系统推荐 (${kwC.filter(c=>c.source==='rec').length})`;
+  cnt('av-contact').innerHTML = `👤 联系人 (${kwC.length})`;
+  cnt('av-company').innerHTML = `🏢 公司 (${kwCo.length})`;
+  const rows = [...contacts, ...companies];
+  /* 排序：① 来源权重 已合作>私域导入>系统推荐 ② 关联/解锁项目数降序 ③ 最近标记时间倒序 ④ 平局联系人在前 */
+  const wt = {coop:3, private:2, rec:1};
+  rows.sort((a,b)=>{
+    if (wt[a.data.source] !== wt[b.data.source]) return wt[b.data.source] - wt[a.data.source];
+    if (a.data.projects.length !== b.data.projects.length) return b.data.projects.length - a.data.projects.length;
+    const da = a.data.markedDate||'', db = b.data.markedDate||'';
+    if (da !== db) return db.localeCompare(da);
+    if (a.kind !== b.kind) return a.kind==='contact' ? -1 : 1;
+    return 0;
+  });
+  document.getElementById('all-list').innerHTML = rows.length ? rows.map(r=> r.kind==='contact'?contactRow(r.data):companyRow(r.data)).join('')
+    : `<div class="p-12 text-center text-gray-400 text-sm">未找到符合条件的人脉</div>`;
+}
+function contactRow(c){
+  const s = srcConf[c.source];
+  const projTags = c.projects.map(p=>`
+    <span class="inline-flex items-center text-[12px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
+      🏗 ${p.name}
+      <span class="text-[13px] ml-1 font-semibold ${p.match>=70?'text-green-600':p.match>=50?'text-blue-500':'text-gray-400'}">${p.match}%</span>
+    </span>`).join('');
+  let actions = `<button onclick="event.stopPropagation();openDrawer(${c.id})" class="text-[12px] bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600 whitespace-nowrap">🎯 商机穿透</button>`;
+  if (c.source==='coop') actions += `<button onclick="event.stopPropagation();unmarkContact(${c.id})" class="text-[12px] border border-red-200 text-red-500 px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap">取消合作</button>`;
+  else actions += `<button onclick="event.stopPropagation();removeContact(${c.id})" class="text-[12px] border border-gray-200 text-gray-400 px-2 py-1 rounded hover:border-red-300 hover:text-red-500 whitespace-nowrap">删除</button>`;
+  return `<div class="p-3 hover:bg-blue-50/40 transition-all cursor-pointer ${s.row}" onclick="openDrawer(${c.id})">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-bold flex-shrink-0">👤</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+          <span class="text-sm font-semibold text-gray-900">${c.name}</span>
+          <span class="text-[12px] text-gray-500">${c.title}</span>
+          <span class="text-[12px] font-medium ${s.cls} border px-1.5 py-0.5 rounded-full" ${c.source==='coop'&&c.coop?`title="合作来源：${c.coop}"`:''}>${s.label}</span>
+        </div>
+        <div class="text-[13px] text-blue-600 mb-1">${c.company}</div>
+        <div class="text-[12px] text-gray-400 mb-1">🔗 ${c.via}</div>
+        <div class="flex gap-1 flex-wrap">${projTags}</div>
+      </div>
+      <div class="flex gap-1 items-start flex-shrink-0 flex-wrap justify-end max-w-[280px]">${actions}</div>
+    </div>
+  </div>`;
+}
+function companyRow(co){
+  const s = srcConf[co.source];
+  const dCount = co.projects.filter(p=>p.direct).length, iCount = co.projects.length-dCount;
+  const open = expandedCo===co.id;
+  return `<div class="p-3 transition-all">
+    <div class="flex items-start gap-3 cursor-pointer ${s.row}" onclick="toggleCompany(${co.id})">
+      <div class="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center text-sm flex-shrink-0 border border-blue-200">🏢</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+          <span class="text-sm font-semibold text-gray-900">${co.name}</span>
+          <span class="text-[12px] font-medium ${s.cls} border px-1.5 py-0.5 rounded-full" ${co.coop?`title="合作来源：${co.coop}"`:''}>${s.label} · 公司</span>
+        </div>
+        ${co.alias?`<div class="text-[12px] text-gray-400">（${co.alias}）${co.group?` · ${co.group}`:''}</div>`:(co.group?`<div class="text-[12px] text-gray-400">${co.group}</div>`:'')}
+        <div class="text-[12px] text-gray-400 mt-1" title="解锁与展示口径：数据层解锁该企业全部参与项目（支撑二度穿透与合作档案）；默认只展示近12个月有更新且未竣工的活跃项目（≤50条，更新时间倒序）。直接=该企业作为参与方；间接=与其共同参与过项目的其他企业的项目">您于 ${co.markedDate} 标记合作 · 参与项目 ${co.total||co.projects.length} 个 · <span class="text-gray-700 font-medium">近12个月活跃 ${co.projects.length} 个</span>（直接 ${dCount} / 间接 ${iCount}）</div>
+      </div>
+      <div class="flex gap-1 items-start flex-shrink-0 flex-wrap justify-end max-w-[280px]" onclick="event.stopPropagation()">
+        <button onclick="event.stopPropagation();toggleCompany(${co.id})" class="text-[12px] px-2.5 py-1 rounded whitespace-nowrap font-medium transition-colors ${open?'bg-blue-600 text-white hover:bg-blue-700':'bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-100'}">${open?'收起项目 ∧':'📊 展开项目'}</button>
+        ${co.source==='coop'
+          ? `<button onclick="unmarkCompany(${co.id})" class="text-[12px] border border-red-200 text-red-500 px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap">取消合作</button>` : ''}
+      </div>
+    </div>
+    ${open?`<div class="mt-2 ml-11 space-y-2">
+      <div class="text-[12px] text-gray-500 flex items-center gap-2">
+        <span class="font-medium">最新项目</span><span class="text-gray-400">（近12个月有更新，最多展示50条）</span>
+        <span class="ml-auto text-blue-500 hover:underline cursor-pointer">查看全部 ${co.total||co.projects.length} 个项目 →</span>
+      </div>
+      ${co.projects.map(p=>miniProjCard(p)).join('')}
+    </div>`:''}
+  </div>`;
+}
+function miniProjCard(p){
+  const tag = p.direct
+    ? `<span class="text-[11px] bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded font-medium flex-shrink-0">直接</span>`
+    : `<span class="text-[11px] bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded font-medium flex-shrink-0">间接</span>`;
+  return `<div class="border border-gray-100 rounded-lg px-3 py-2 bg-gray-50/50">
+    <div class="flex items-center gap-2">
+      ${tag}
+      <span class="text-[13px] text-gray-700 leading-snug">${p.name}</span>
+    </div>
+    <div class="flex gap-3 flex-wrap text-[11px] text-gray-400 mt-1"><span>${p.date}</span><span>${p.region}</span><span>${p.stage}</span><span>${p.industry}</span></div>
+  </div>`;
+}
+function toggleCompany(id){
+  expandedCo = expandedCo===id ? null : id;
+  renderAllList();
+}
+
+/* ================= 可能认识的人（全部人脉顶部轻量推荐条） ================= */
+function renderMayKnow(){
+  const bar = document.getElementById('mayknow-bar');
+  const box = document.getElementById('mayknow-list');
+  if (!SUGGEST_POOL.length){ bar.style.display='none'; return; }
+  bar.style.display = '';
+  box.innerHTML = SUGGEST_POOL.slice(0,8).map(s=>`
+    <div class="flex-shrink-0 w-56 border border-gray-200 rounded-lg p-2.5 bg-white hover:border-blue-300 transition-all">
+      <div class="flex items-center gap-2">
+        ${s.type==='company'
+          ? '<span class="w-7 h-7 rounded bg-blue-100 text-blue-700 border border-blue-200 flex items-center justify-center text-[13px] flex-shrink-0">🏢</span>'
+          : `<span class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-[13px] font-bold flex-shrink-0">${s.name[0]}</span>`}
+        <div class="min-w-0">
+          <div class="text-[13px] font-semibold text-gray-800 truncate">${s.name}</div>
+          <div class="text-[11px] text-gray-400 truncate">${s.company}</div>
+        </div>
+      </div>
+      <div class="text-[11px] text-gray-400 mt-1.5 h-8 overflow-hidden leading-snug">${s.kind==='coproject'?`🔗 ${s.reason}`:'👀 最近浏览过'}</div>
+      <button onclick="markSuggest(${s.id})" class="mt-1.5 w-full text-[12px] bg-blue-600 text-white py-1 rounded hover:bg-blue-700">＋ 标记合作</button>
+    </div>`).join('');
+}
+function rotateSuggest(){
+  const recent = SUGGEST_POOL.filter(s=>s.kind==='recent');
+  if (!recent.length) return;
+  sgOffset++;
+  const head = recent.slice(0, sgOffset%recent.length);
+  const tail = recent.slice(sgOffset%recent.length);
+  const reordered = [...tail, ...head];
+  let ri = 0;
+  SUGGEST_POOL = SUGGEST_POOL.map(s => s.kind==='recent' ? reordered[ri++] : s);
+  renderMayKnow();
+  showToast('已换一批推荐');
+}
+function markSuggest(id){
+  const s = SUGGEST_POOL.find(x=>x.id===id); if (!s) return;
+  const i = SUGGEST_POOL.indexOf(s); SUGGEST_POOL.splice(i,1);
+  if (s.type==='company'){
+    COMPANIES.push({id:Date.now()%100000, type:'company', name:s.name, alias:'', group:'', source:'coop', markedDate:'2026-09-18', remark:'', coop:s.reason||'可能认识的人推荐', projects:[]});
+  } else {
+    CONTACTS.push({id:Date.now()%100000, name:s.name, title:'', company:s.company, source:'coop', degree:1, avatar:s.name[0], remark:'',
+      via:`标记合作 · 2026-09-18 · 来源：可能认识的人（${s.kind==='coproject'?'共同参与推荐':'最近浏览推荐'}）`,
+      coop: s.kind==='coproject' ? `可能认识的人 · ${s.reason}` : '可能认识的人 · 最近浏览推荐',
+      path:['我',s.name], projects:[], tip:`「${s.name}」已标记合作，系统正在穿透其关联项目与2度人脉。`});
+  }
+  updateStats(); renderAllList(); renderMayKnow();
+  showToast(`🤝 已标记合作「${s.name}」→ 写入我的人脉，系统开始穿透其关联项目`);
+  showJumpPill();
+}
+
+/* ================= 场景演示页（真实页面模拟，闭环核心） ================= */
+let _seq = 1000;
+const SCENE_PROJECT = {
+  title:'拉萨综合保税物流园（一期）项目（EPC）', stage:'初步设计', region:'西藏自治区/拉萨市', industry:'物流/仓储', invest:'12.6亿',
+  units:[
+    {id:'pu1', name:'城关区住房城乡建设和交通运输局', role:'业主单位', tags:['政府','招标59','项目102','VIP联系人4'], type:'company'},
+    {id:'pu2', name:'拉萨市设计集团有限公司', role:'设计院', tags:['初步设计','招标27','项目6','VIP联系人2'], type:'company'},
+  ],
+  contacts:[
+    {id:'pc1', name:'李**', duty:'项目负责人', unit:'城关区住房城乡建设和交通运输局', addr:'西藏拉萨市城关区林廓东路38号', note:'该联系人已被多次拨打，接通率较低，建议错峰拨打', fresh:false},
+    {id:'pc2', name:'谢*', duty:'给排水工程师', unit:'拉萨市设计集团有限公司', addr:'拉萨市堆龙德庆区工业园区B区…317号', fresh:false},
+    {id:'pc3', name:'黄**', duty:'建筑工程师', unit:'拉萨市设计集团有限公司', addr:'拉萨市堆龙德庆区工业园区B区…317号', fresh:false},
+    {id:'pc4', name:'陈*', duty:'设计负责人', unit:'拉萨市设计集团有限公司', addr:'拉萨市堆龙德庆区工业园区B区…317号', note:'今日新增', fresh:true},
+  ],
+};
+const SCENE_COMPANY = {
+  name:'武平县岩前恒业建材有限公司', industry:'冶金矿产', addr:'福建省龙岩市武平县岩前镇大布村长埂窝32-3号',
+  project:'武平县年产500万吨石灰岩矿开采及钙基产品精深加工项目',
+  contacts:[
+    {name:'钟*平', dept:'--', duty:'项目统筹', project:'武平县年产500万吨石灰岩矿开采及钙基产品精深加工项目', stage:'报批立项', invest:'106000.00万', date:'2026-09-18'},
+    {name:'练*贵', dept:'--', duty:'项目总负责人', project:'武平县年产500万吨石灰岩矿开采及钙基产品精深加工项目', stage:'报批立项', invest:'106000.00万', date:'2026-09-18'},
+  ],
+};
+const SCENE_QUERY = {
+  total:'1915361', tabs:['甲方单位 1320714','设计院 259339','施工单位 335308'],
+  rows:[
+    {id:'cc1', name:'钟*平', role:'股东', dept:'--', duty:'项目统筹', company:'武平县岩前恒业建材有限公司', projects:1, project:'武平县年产500万吨石灰岩矿开采及钙基产品精深加工项目'},
+    {id:'cc2', name:'邵*刚', role:'法人', dept:'--', duty:'项目知情人', company:'湖北盛城环创科技有限公司', projects:1, project:'湖北盛城环创科技产业园项目'},
+    {id:'cc3', name:'李*宸', role:'—', dept:'--', duty:'负责手续', company:'广西万鸣食品有限公司', projects:1, project:'广西万鸣食品生产基地项目'},
+  ],
+};
+let sceneQueryTab = 0, sceneQueryStatus = 'all';
+
+/* 统一标记内核：「标记合作」= 唯一动作，标记后即为已合作；任何场景调用，写入同一份人脉库并回流 */
+function markCoop(o){
+  if (o.type==='company'){
+    const exist = COMPANIES.find(c=>c.name===o.name);
+    if (exist){ exist.source = 'coop'; if(!exist.coop) exist.coop = o.fromProject; }
+    else COMPANIES.push({id:++_seq, type:'company', name:o.name, alias:'', group:'', source:'coop', markedDate:'2026-09-18', remark:'', coop:o.fromProject, projects:[]});
+  } else {
+    const exist = CONTACTS.find(c=>c.name===o.name);
+    if (exist){ exist.source = 'coop'; if(!exist.coop) exist.coop = o.fromProject; }
+    else CONTACTS.push({id:++_seq, name:o.name, title:o.title||'', company:o.company||'', source:'coop', degree:1, avatar:o.name[0], remark:'', coop:o.fromProject,
+      via:`在「${o.fromProject}」${o.sceneLabel}中标记合作 · ${o.role}`,
+      path:['我',o.name],
+      projects:[{name:o.fromProject, stage:'跟踪中', role:o.role, match:88}],
+      tip:`「${o.name}」是在${o.sceneLabel}中标记合作的联系人，来源「${o.fromProject}」。合作关系为最强推荐信号，其关联项目优先呈现。`});
+    OPPORTUNITIES.unshift({
+      id:++_seq, direct:true, deps:[o.name], depCompanies:[],
+      title:o.fromProject, owner:o.company||'—', ver:'v.1', date:'2026-09-18', region:'—', stage:'跟踪中', industry:'—', invest:'—',
+      path:[{t:'me',label:'我'},{t:'contact',label:o.name+(o.title?' · '+o.title:''),sub:o.company||'',edge:'已合作'}],
+      notes:[`我在${o.sceneLabel}中标记合作了「${o.name}」`,`合作来源：「${o.fromProject}」`]
+    });
+  }
+  updateStats(); renderOppList(); renderAllList(); renderMayKnow(); renderScenes();
+  showToast(`🤝 已标记合作「${o.name}」→ 写入我的人脉，「${o.fromProject||o.name}」已进入人脉商机`);
+  showJumpPill();
+}
+const isCoopC  = name => CONTACTS.some(c=>c.source==='coop' && c.name===name);
+const isCoopCo = name => COMPANIES.some(c=>c.source==='coop' && c.name===name);
+
+/* 场景按钮（状态读取人脉库，天然回显） */
+function coopBtn(type, name, fn){
+  const marked = type==='company' ? isCoopCo(name) : isCoopC(name);
+  return marked
+    ? `<span class="text-[12px] text-green-700 font-medium bg-green-50 border border-green-200 rounded px-2 py-1 whitespace-nowrap">✅ 已合作</span>`
+    : `<button onclick="${fn}" class="text-[12px] bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700 whitespace-nowrap">🤝 标记合作</button>`;
+}
+
+/* ===== 场景1：项目详情 · 项目联系人 ===== */
+function sceneUnitBlock(u){
+  return `<div class="border border-gray-200 rounded-lg overflow-hidden">
+    <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex-wrap">
+      <span class="text-[13px] font-semibold text-blue-700 cursor-pointer hover:underline">${u.name}</span>
+      <span class="text-[11px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">${u.role}</span>
+      ${u.tags.map(t=>`<span class="text-[11px] text-gray-400 border border-gray-200 rounded px-1.5 py-0.5 bg-white">${t} ›</span>`).join('')}
+      <div class="ml-auto">${coopBtn('company', u.name, `markProjectUnit('${u.id}')`)}</div>
+    </div>
+    <div class="p-3 grid grid-cols-2 gap-2.5">
+      ${SCENE_PROJECT.contacts.filter(c=>c.unit===u.name).map(sceneContactCard).join('')}
+    </div>
+  </div>`;
+}
+function sceneContactCard(c){
+  return `<div class="border border-gray-200 rounded-lg p-3 relative">
+    ${c.fresh?'<span class="absolute top-2 right-2 text-[10px] bg-red-500 text-white px-1 rounded">NEW</span>':''}
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-bold flex-shrink-0">${c.name[0]}</span>
+      <div>
+        <div class="text-[13px] font-semibold text-gray-800">${c.name} <span class="font-normal text-blue-500 text-[12px] cursor-pointer hover:underline">点击查看联系方式</span></div>
+        <div class="text-[12px] text-gray-500">${c.duty}</div>
+      </div>
+    </div>
+    ${c.note?`<div class="text-[12px] text-amber-700 bg-amber-50 border border-amber-100 rounded px-2 py-1 mt-2">💡 ${c.note}</div>`:''}
+    <div class="text-[12px] text-gray-400 mt-2">📍 ${c.addr}</div>
+    <div class="flex gap-1.5 mt-2.5">
+      <button onclick="showToast('原型演示：查看该联系人相关项目')" class="text-[12px] border border-gray-200 text-gray-500 px-2 py-1 rounded hover:border-blue-300 hover:text-blue-600">相关项目</button>
+      ${coopBtn('contact', c.name, `markProjectContact('${c.id}')`)}
+      <button onclick="gotoOppWith('${c.name}')" class="text-[12px] border border-gray-200 text-gray-500 px-2 py-1 rounded hover:border-blue-300 hover:text-blue-600">人脉推荐</button>
+    </div>
+  </div>`;
+}
+function renderSceneProject(){
+  const s = SCENE_PROJECT;
+  document.getElementById('scene-project').innerHTML = `
+  <div class="bg-white rounded-lg border border-gray-200">
+    <div class="px-4 pt-3 pb-2 border-b border-gray-100">
+      <div class="text-[12px] text-gray-400 mb-1">项目信息 / 西藏自治区 / 拉萨市</div>
+      <div class="text-base font-bold text-gray-900">${s.title}</div>
+      <div class="flex gap-3 flex-wrap text-[12px] text-gray-500 mt-1.5">
+        <span>项目阶段：${s.stage}</span><span>${s.region}</span><span>行业：${s.industry}</span><span>投资额：${s.invest}</span><span>更新时间：2026-09-18</span>
+      </div>
+      <div class="flex gap-1 mt-2.5 flex-wrap text-[13px] border-t border-gray-100 pt-2">
+        ${['项目跟踪','项目进展','项目介绍','项目详情','项目联系人','项目备注','相关项目'].map(t=>`<span class="px-2.5 py-1 cursor-pointer ${t==='项目联系人'?'text-blue-600 font-medium border-b-2 border-blue-600':'text-gray-500 hover:text-gray-700'}">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div class="p-3 space-y-3">${s.units.map(sceneUnitBlock).join('')}</div>
+  </div>`;
+}
+
+/* ===== 场景2：企业详情 · 找客户 ===== */
+function renderSceneCompany(){
+  const s = SCENE_COMPANY;
+  document.getElementById('scene-company').innerHTML = `
+  <div class="bg-white rounded-lg border border-gray-200">
+    <div class="px-4 py-3 border-b border-gray-100 flex items-start gap-3 flex-wrap">
+      <div class="flex-1 min-w-[300px]">
+        <div class="text-[12px] text-gray-400 mb-1">找客户 / 企业详情</div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-base font-bold text-gray-900">${s.name}</span>
+          <span class="text-[11px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">${s.industry}</span>
+        </div>
+        <div class="text-[12px] text-gray-500 mt-1">📍 ${s.addr}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="text-[13px] border border-gray-200 text-gray-500 px-3 py-1.5 rounded hover:bg-gray-50">☆ 收藏</button>
+        <button class="text-[13px] border border-gray-200 text-gray-500 px-3 py-1.5 rounded hover:bg-gray-50">添加至目标客户库</button>
+        ${coopBtn('company', s.name, 'markCompanyTop()')}
+      </div>
+    </div>
+    <div class="px-4 border-b border-gray-100 flex gap-1 flex-wrap text-[13px]">
+      ${['联系人(2)','项目列表(4)','相关招投标','招标关联企业信息','企业股权穿透','基本信息','企业商情分析','企业全景报告'].map((t,i)=>`<span class="px-2.5 py-2 cursor-pointer ${i===0?'text-blue-600 font-medium border-b-2 border-blue-600':'text-gray-500 hover:text-gray-700'}">${t}</span>`).join('')}
+    </div>
+    <div class="px-4 py-2 text-[12px] text-gray-400">VIP联系人(2) ｜ <span class="cursor-pointer hover:text-blue-500">更多联系人(5)</span></div>
+    <table class="w-full text-[13px]">
+      <thead><tr class="bg-gray-50 text-gray-500 text-[12px]">
+        <th class="px-3 py-2 text-left font-medium">姓名</th><th class="px-3 py-2 text-left font-medium">部门</th><th class="px-3 py-2 text-left font-medium">职责</th><th class="px-3 py-2 text-left font-medium">联系方式</th><th class="px-3 py-2 text-left font-medium">负责项目</th><th class="px-3 py-2 text-left font-medium">项目阶段</th><th class="px-3 py-2 text-left font-medium">投资额</th><th class="px-3 py-2 text-left font-medium">发布时间</th><th class="px-3 py-2 text-left font-medium">操作</th>
+      </tr></thead>
+      <tbody class="divide-y divide-gray-50">
+      ${s.contacts.map(c=>`<tr class="hover:bg-blue-50/40">
+        <td class="px-3 py-2 font-medium text-gray-800">${c.name}</td>
+        <td class="px-3 py-2 text-gray-400">${c.dept}</td>
+        <td class="px-3 py-2">${c.duty}</td>
+        <td class="px-3 py-2 text-blue-500 cursor-pointer hover:underline">***查看</td>
+        <td class="px-3 py-2 text-blue-700 max-w-[280px] truncate" title="${c.project}">${c.project}</td>
+        <td class="px-3 py-2">${c.stage}</td>
+        <td class="px-3 py-2">${c.invest}</td>
+        <td class="px-3 py-2 text-gray-500">${c.date}</td>
+        <td class="px-3 py-2 text-blue-500 cursor-pointer hover:underline">查看更多项目...</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="px-4 py-2 text-[12px] text-gray-400 border-t border-gray-100">企业级「标记合作」写入我的人脉（公司节点，携带来源项目）；其名下联系人可在工程人脉查询中分别标记合作。</div>
+  </div>`;
+}
+
+/* ===== 场景3：工程人脉查询 · 联系人列表 ===== */
+function renderSceneContacts(){
+  const s = SCENE_QUERY;
+  const rows = s.rows.filter(r=> sceneQueryStatus==='all' || isCoopC(r.name) );
+  document.getElementById('scene-contacts').innerHTML = `
+  <div class="bg-white rounded-lg border border-gray-200">
+    <div class="px-4 pt-3 pb-2 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+      <span class="text-base font-bold text-gray-900">工程人脉查询</span>
+      <span class="text-[12px] text-gray-400">共 ${s.total} 条联系人信息</span>
+    </div>
+    <div class="px-4 pt-2 flex gap-1 flex-wrap text-[13px] border-b border-gray-100">
+      ${s.tabs.map((t,i)=>`<span onclick="sceneQueryTab=${i};renderSceneContacts()" class="px-3 py-2 cursor-pointer ${i===sceneQueryTab?'text-blue-600 font-medium border-b-2 border-blue-600':'text-gray-500 hover:text-gray-700'}">${t}</span>`).join('')}
+    </div>
+    <div class="px-4 py-2.5 flex items-center gap-2 flex-wrap bg-gray-50 border-b border-gray-100 text-[13px]">
+      <select class="border border-gray-200 rounded px-2 py-1 text-gray-600"><option>西藏自治区</option><option>全部地区</option></select>
+      <input placeholder="职责搜索，如：项目经理" class="border border-gray-200 rounded px-2.5 py-1 w-44 outline-none focus:border-blue-400">
+      <select onchange="sceneQueryStatus=this.value;renderSceneContacts()" class="border border-gray-200 rounded px-2 py-1 text-gray-600">
+        <option value="all" ${sceneQueryStatus==='all'?'selected':''}>标记状态：全部</option>
+        <option value="coop" ${sceneQueryStatus==='coop'?'selected':''}>已合作</option>
+      </select>
+      <button onclick="sceneQueryStatus='all';renderSceneContacts()" class="text-blue-600 hover:text-blue-800">清空</button>
+      <span class="ml-auto text-[12px] text-gray-400">筛选结果 ${rows.length} 条</span>
+    </div>
+    ${sceneQueryStatus!=='all' && rows.length===0 ? `
+    <div class="p-10 text-center">
+      <div class="text-3xl mb-2">🤝</div>
+      <div class="text-gray-500 text-[13px] mb-1">暂无「已合作」的联系人</div>
+      <div class="text-[12px] text-gray-400 mb-3">在项目详情、企业详情或本列表中标记合作后，这里将筛选出您的合作人脉（数据读取自「我的人脉」库）</div>
+      <button onclick="openScene('project')" class="bg-blue-600 text-white text-[13px] px-4 py-1.5 rounded hover:bg-blue-700">去项目详情体验标记合作</button>
+    </div>`
+    : `<div class="divide-y divide-gray-50">${rows.map(r=>`
+    <div class="px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      <div class="w-44"><span class="text-[13px] font-semibold text-gray-800">${r.name}</span> <span class="text-[12px] text-gray-400">${r.role}</span></div>
+      <span class="text-[12px] text-blue-500 cursor-pointer hover:underline w-20">点击查看</span>
+      <span class="text-[12px] text-gray-400 w-14">${r.dept}</span>
+      <span class="text-[13px] text-gray-600 w-28">${r.duty}</span>
+      <span class="text-[13px] text-blue-700 flex-1 min-w-[180px] truncate">${r.company}</span>
+      <span class="text-[12px] text-gray-500 w-24">精准项目 ${r.projects}条</span>
+      <div class="flex gap-1.5">
+        ${coopBtn('contact', r.name, `markQueryContact('${r.id}')`)}
+        <button onclick="gotoOppWith('${r.name}')" class="text-[12px] border border-gray-200 text-gray-500 px-2 py-1 rounded hover:border-blue-300 hover:text-blue-600">人脉推荐</button>
+      </div>
+    </div>`).join('')}</div>`}
+    <div class="px-4 py-2 text-[12px] text-gray-400 border-t border-gray-100">「标记状态」筛选读取的是我的人脉库中「已合作」的联系人——在任意场景标记合作后，这里立即生效。</div>
+  </div>`;
+}
+
+/* ===== 场景包装 ===== */
+function renderScenes(){ renderSceneProject(); renderSceneCompany(); renderSceneContacts(); }
+function setTopNav(k){
+  const ids = {proj:'tn-proj', bid:'tn-bid', cust:'tn-cust', net:'tn-net', chan:'tn-chan'};
+  Object.entries(ids).forEach(([key,id])=>{
+    document.getElementById(id).className = 'px-3 py-1.5 text-sm cursor-pointer ' + (key===k
+      ? 'text-blue-600 font-medium border-b-2 border-blue-600'
+      : 'text-gray-500 hover:text-gray-700');
+  });
+}
+function openScene(k){
+  document.getElementById('page-my').classList.add('hidden');
+  document.getElementById('page-scene').classList.remove('hidden');
+  ['project','company','contacts'].forEach(s=>document.getElementById('scene-'+s).classList.toggle('hidden', s!==k));
+  const conf = {
+    project:{nav:'proj', top:'找商机', sub:'工程人脉查询', text:'项目详情 · 项目联系人——在参与单位（业主/设计院）与联系人卡片上体验「标记合作」'},
+    company:{nav:'cust', top:'找客户', sub:'工程人脉查询', text:'企业详情（找客户）——头部「标记合作」将该企业写入我的人脉并携带来源项目'},
+    contacts:{nav:'net', top:'找人脉', sub:'工程人脉查询', text:'工程人脉查询 · 联系人列表——直接「标记合作」，按「标记状态」筛选看回流'},
+  }[k];
+  setTopNav(conf.nav); renderNav(conf.top, conf.sub);
+  document.getElementById('scene-banner-text').textContent = conf.text;
+  renderScenes();
+  document.querySelector('main').scrollTop = 0;
+}
+function backToMy(){
+  document.getElementById('page-scene').classList.add('hidden');
+  document.getElementById('page-my').classList.remove('hidden');
+  setTopNav('net'); renderNav('找人脉','我的人脉商机');
+  document.querySelector('main').scrollTop = 0;
+}
+
+/* ===== 场景内的标记包装 ===== */
+function markProjectUnit(id){
+  const u = SCENE_PROJECT.units.find(x=>x.id===id);
+  if (!u || isCoopCo(u.name)) return;
+  markCoop({type:'company', level:'coop', name:u.name, fromProject:SCENE_PROJECT.title, role:u.role, sceneLabel:`项目详情（${u.role}）`});
+}
+function markProjectContact(id){
+  const c = SCENE_PROJECT.contacts.find(x=>x.id===id);
+  if (!c || isCoopC(c.name)) return;
+  markCoop({type:'contact', level:'coop', name:c.name, title:c.duty, company:c.unit, fromProject:SCENE_PROJECT.title, role:c.duty, sceneLabel:'项目详情·项目联系人'});
+}
+function markCompanyTop(){
+  const s = SCENE_COMPANY;
+  if (isCoopCo(s.name)) return;
+  markCoop({type:'company', level:'coop', name:s.name, fromProject:s.project, role:'合作企业', sceneLabel:'企业详情'});
+}
+function markQueryContact(id){
+  const r = SCENE_QUERY.rows.find(x=>x.id===id);
+  if (!r || isCoopC(r.name)) return;
+  markCoop({type:'contact', name:r.name, title:r.duty, company:r.company, fromProject:r.project, role:r.duty, sceneLabel:'工程人脉查询·联系人列表'});
+}
+
+/* ===== 回流浮标 & 跳转 ===== */
+let _pillTimer = null;
+function showJumpPill(){
+  const p = document.getElementById('jump-pill');
+  p.classList.remove('hidden');
+  clearTimeout(_pillTimer);
+  _pillTimer = setTimeout(()=>p.classList.add('hidden'), 5000);
+}
+function jumpToMyAll(){
+  document.getElementById('jump-pill').classList.add('hidden');
+  backToMy(); gotoAll();
+}
+function gotoAll(){
+  switchMainTab(document.querySelectorAll('.main-tab')[1],'all');
+}
+function toggleSceneMenu(){
+  document.getElementById('scene-menu').classList.toggle('hidden');
+}
+function gotoOppWith(kw){
+  backToMy();
+  switchMainTab(document.querySelectorAll('.main-tab')[0],'opp');
+  document.getElementById('opp-search').value = kw;
+  renderOppList();
+}
+
+/* ================= 取消合作 / 删除 ================= */
+/* 取消合作（联系人）→ 移出人脉库并联动移除其解锁的商机 */
+function unmarkContact(id){
+  const c = CONTACTS.find(x=>x.id===id); if (!c) return;
+  const n = OPPORTUNITIES.filter(o=>o.deps.includes(c.name)).length;
+  if (!confirm(`确定取消与「${c.name}」的合作吗？${n?`其解锁的 ${n} 个项目将同时从「人脉商机」移除。`:''}`)) return;
+  CONTACTS = CONTACTS.filter(x=>x.id!==id);
+  OPPORTUNITIES = OPPORTUNITIES.filter(o=>!o.deps.includes(c.name));
+  expandedCo = null;
+  updateStats(); renderOppList(); renderAllList(); renderScenes();
+  showToast(`已取消合作${n?`，${n} 个关联商机同步移除`:''}`);
+}
+/* 取消合作（公司）→ 移出并联动移除商机 */
+function unmarkCompany(id){
+  const co = COMPANIES.find(x=>x.id===id); if (!co) return;
+  const n = OPPORTUNITIES.filter(o=>o.depCompanies.includes(co.name)).length;
+  if (!confirm(`确定取消与「${co.name}」的合作吗？${n?`其解锁的 ${n} 个项目将同时从「人脉商机」移除。`:''}`)) return;
+  COMPANIES = COMPANIES.filter(x=>x.id!==id);
+  OPPORTUNITIES = OPPORTUNITIES.filter(o=>!o.depCompanies.includes(co.name));
+  if (expandedCo===id) expandedCo = null;
+  updateStats(); renderOppList(); renderAllList();
+  showToast(`已取消合作${n?`，${n} 个关联商机同步移除`:''}`);
+}
+function removeContact(id){
+  const c = CONTACTS.find(x=>x.id===id); if (!c) return;
+  if (!confirm(`确定删除联系人「${CONTACTS.find(x=>x.id===id)?.name||''}」吗？其解锁的项目将同步移除。`)) return;
+  CONTACTS = CONTACTS.filter(c=>c.id!==id);
+  OPPORTUNITIES = OPPORTUNITIES.filter(o=>!o.deps.includes(c.name));
+  updateStats(); renderOppList(); renderAllList();
+  showToast('🗑 已删除');
+}
+
+/* ================= 商机穿透抽屉 ================= */
+function openDrawer(id){
+  const c = CONTACTS.find(x=>x.id===id); if (!c) return;
+  const s = srcConf[c.source];
+  document.getElementById('drawer-name').textContent = `${c.name}${c.title?' · '+c.title:''}`;
+  document.getElementById('drawer-sub').textContent = `${c.company} · ${s.label}`;
+  document.getElementById('drawer-via-block').innerHTML = `<span class="font-medium">关系来源：</span>${c.via}`
+    + (c.coop?`<div class="mt-2 pt-2 border-t border-blue-100">🤝 <b>合作来源</b>：${c.coop}</div>`:'');
+  document.getElementById('drawer-path').innerHTML = c.path.map((n,i)=>`
+    ${i>0?'<span class="path-arrow">—'+(i===1?(c.source==='coop'?'已合作':c.source==='private'?'私域导入':'直接联系'):'引荐')+'→</span>':''}
+    <span class="path-node ${i===0?'me':((c.source==='coop')?'contact':(c.degree===2?'contact':'target'))}">${n}</span>
+  `).join('');
+  document.getElementById('drawer-projects').innerHTML = c.projects.length ? c.projects.map(p=>`
+    <div class="flex items-center justify-between border border-gray-200 rounded-lg p-2.5 hover:border-orange-300 hover:bg-orange-50 transition-all cursor-pointer">
+      <div>
+        <div class="text-sm font-medium text-blue-700">${p.name}</div>
+        <div class="text-[12px] text-gray-500 mt-0.5">${p.stage} · <span class="text-orange-600 font-medium">${p.role}</span></div>
+      </div>
+      <div class="text-right flex-shrink-0 ml-3">
+        <div class="text-sm font-bold ${p.match>=70?'text-green-600':p.match>=50?'text-blue-600':'text-gray-500'}">${p.match}%</div>
+        <div class="text-[12px] text-gray-400">匹配度</div>
+      </div>
+    </div>`).join('') : `<div class="text-[13px] text-gray-400 border border-dashed border-gray-200 rounded-lg p-3 text-center">系统正在穿透其关联项目…</div>`;
+  document.getElementById('drawer-tip').textContent = c.tip;
+  document.getElementById('contact-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('contact-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+/* ================= 导入弹窗 ================= */
+const COMPANY_MAP = {
+  '葛洲坝':[{name:'葛洲坝集团国际工程有限公司',type:'央企',c:97},{name:'中国葛洲坝集团三峡建设工程有限公司',type:'央企',c:72}],
+  '国网':[{name:'国网新源控股有限公司',type:'央企',c:88},{name:'国家电网有限公司',type:'央企',c:75}],
+  '电建':[{name:'中国电建集团华东勘测设计研究院有限公司',type:'央企',c:85}],
+  '华电':[{name:'中国华电工程（集团）有限公司',type:'央企',c:55},{name:'华电国际电力股份有限公司',type:'上市',c:48}],
+};
+let _selectedCompany = null;
+function onManualCompanyInput(val){
+  _selectedCompany = null;
+  const panel = document.getElementById('m-match-panel');
+  if (!val || val.length < 2){ showToast('请输入至少2个字符后再匹配'); return; }
+  const key = Object.keys(COMPANY_MAP).find(k => val.includes(k));
+  if (!key){
+    panel.className = 'rounded-lg border border-gray-200 bg-gray-50 text-[13px] p-2.5';
+    panel.classList.remove('hidden');
+    panel.innerHTML = `<div class="text-gray-500">未在平台企业库中找到匹配结果，您的人脉仍可以<span class="text-orange-500 font-medium">纯私域</span>状态导入。</div>`;
+    return;
+  }
+  const cands = COMPANY_MAP[key];
+  const top = cands[0];
+  if (top.c >= 90) _selectedCompany = top;
+  panel.className = 'rounded-lg border border-green-200 bg-green-50 text-[13px] p-2';
+  panel.classList.remove('hidden');
+  panel.innerHTML = `<div class="text-green-700 font-medium mb-1.5">✅ 已自动匹配（置信度 ${top.c}%），可修改：</div>`
+    + cands.map(c=>`
+      <label class="flex items-center gap-2 cursor-pointer hover:bg-green-100 rounded px-1 py-0.5" onclick="_selectedCompany={name:'${c.name}',type:'${c.type}',c:${c.c}}">
+        <input type="radio" name="m-company-radio" ${c===top?'checked':''} class="w-3 h-3">
+        <span class="flex-1 text-gray-700">${c.name}</span>
+        <span class="font-medium text-green-600 text-[12px]">${c.c}%</span>
+      </label>`).join('');
+}
+function submitManual(){
+  const name = document.getElementById('m-name').value.trim();
+  if (!name){ showToast('请填写姓名'); return; }
+  const phone = document.getElementById('m-phone').value.trim();
+  const wechat = document.getElementById('m-wechat').value.trim();
+  if (!phone && !wechat){ showToast('手机号和微信号至少填写一项'); return; }
+  const companyInput = document.getElementById('m-company').value.trim();
+  if (!companyInput){ showToast('请填写所在企业'); return; }
+  const result = document.getElementById('manual-result');
+  result.classList.remove('hidden');
+  if (_selectedCompany && _selectedCompany.c >= 60){
+    result.className = 'rounded-lg border border-green-200 bg-green-50 p-3 text-[13px]';
+    result.innerHTML = `
+      <div class="flex items-center gap-2 mb-1">
+        <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">${name[0]}</span>
+        <span class="font-semibold text-gray-800">${name}</span>
+        <span class="ml-auto text-green-600 font-medium">✅ 已关联公域数据</span>
+      </div>
+      <div class="text-gray-600">🏢 ${_selectedCompany.name} <span class="text-gray-400">${_selectedCompany.type}</span></div>
+      <div class="mt-1.5 text-green-700 bg-green-100 rounded px-2 py-1">可参与关系图谱推算，系统将自动挖掘2度人脉</div>
+      <button onclick="resetManualForm()" class="mt-2 text-blue-600 text-[12px] hover:underline">+ 继续添加</button>`;
+  } else {
+    result.className = 'rounded-lg border border-orange-200 bg-orange-50 p-3 text-[13px]';
+    result.innerHTML = `
+      <div class="flex items-center gap-2 mb-1">
+        <span class="w-7 h-7 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center font-bold text-sm flex-shrink-0">${name[0]}</span>
+        <span class="font-semibold text-gray-800">${name}</span>
+        <span class="ml-auto text-orange-500 font-medium">⚠️ 暂未关联平台数据</span>
+      </div>
+      <div class="text-gray-600">🏢 ${companyInput}</div>
+      <div class="mt-1.5 text-orange-700 bg-orange-100 rounded px-2 py-1">以纯私域状态写入，暂不参与图谱推算</div>
+      <button onclick="resetManualForm()" class="mt-2 text-blue-600 text-[12px] hover:underline">+ 继续添加</button>`;
+  }
+  document.getElementById('manual-form').classList.add('hidden');
+}
+function resetManualForm(){
+  ['m-name','m-phone','m-wechat','m-title','m-company'].forEach(id => document.getElementById(id).value = '');
+  _selectedCompany = null;
+  document.getElementById('m-match-panel').classList.add('hidden');
+  document.getElementById('manual-result').classList.add('hidden');
+  document.getElementById('manual-form').classList.remove('hidden');
+}
+function confirmPurge(){ if (confirm('确定要清除全部私域数据吗？此操作不可恢复。')) showToast('🗑 全部私域数据已清除'); }
+
+/* ================= 通用 ================= */
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); document.body.style.overflow=''; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1'; setTimeout(()=>{ t.style.opacity='0'; }, 2000); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeDrawer(); } });
+
+/* 初始化 */
+updateStats(); renderOppList(); renderAllList(); renderMayKnow(); renderScenes();
+</script>
+</body>
+</html>
