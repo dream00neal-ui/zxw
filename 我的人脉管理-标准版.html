@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的人脉管理（标准版） · 中项网</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.main-tab{padding:9px 20px;font-size:14px;font-weight:500;border-radius:6px 6px 0 0;cursor:pointer;background:#e8f1fd;color:#2563eb;border:1px solid #c7dcfa;border-bottom:none;white-space:nowrap}
+.main-tab.active{background:#2563eb;color:#fff;font-weight:600;border-color:#2563eb}
+.main-tab.locktab{background:#fdf6ec;color:#b45309;border-color:#f3ddb0}
+.degree-1{border-left:3px solid #3b82f6}
+.marked-row{border-left:3px solid #f59e0b}
+.blurred-title{filter:blur(4px);user-select:none}
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800 text-sm flex h-screen overflow-hidden">
+
+<!-- ===== 左侧平台导航 ===== -->
+<aside class="w-48 flex-shrink-0 bg-[#0f172a] text-white flex flex-col overflow-y-auto">
+  <div class="px-3 py-3 border-b border-slate-700">
+    <div class="text-sm font-bold text-blue-400">中项网 × SIEMENS</div>
+    <div class="text-[12px] text-slate-400 mt-0.5">智联工业·共创无限</div>
+  </div>
+  <div class="px-2 py-1.5">
+    <div class="flex items-center gap-1.5 bg-slate-600 text-white text-[12px] px-2 py-1 rounded cursor-pointer">
+      <span>⚡</span><span>智能制造专版</span><span class="ml-auto">∨</span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto py-1" id="nav-list"></nav>
+  <div class="px-3 py-2 border-t border-slate-700 flex items-center gap-2">
+    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center font-medium text-sm">李</div>
+    <div class="text-[12px] text-slate-300 leading-tight">汤维涛<br><span class="text-slate-400">标准版</span></div>
+    <button onclick="showToast('原型演示：升级尊享版')" class="ml-auto text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded">升级</button>
+  </div>
+</aside>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+
+  <header class="bg-white border-b border-gray-200 flex-shrink-0">
+    <div class="flex items-center px-4 h-11 gap-4">
+      <nav class="flex gap-1 flex-1">
+        <a class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">项目信息</a>
+        <a class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">招投标</a>
+        <a class="px-3 py-1.5 text-sm text-blue-600 font-medium border-b-2 border-blue-600 cursor-pointer">找客户</a>
+        <a class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">找人脉</a>
+        <a class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">找渠道</a>
+      </nav>
+      <div class="flex items-center gap-3 text-sm">
+        <button class="text-orange-500 font-medium">🔥 微信商机订阅助手</button>
+        <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">李</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto">
+    <div class="px-5 pt-4">
+
+      <!-- 标准版定位说明 -->
+      <div id="req-note" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 mb-3 flex items-start gap-2 text-[13px] text-blue-900 leading-relaxed">
+        <span class="font-bold flex-shrink-0">📋 标准版定位：</span>
+        <span>标准版架构：<b>我的人脉管理归属于「找客户」</b>（人脉=客户资源管理能力；独立「找人脉」模块为尊享版专属）。<b>管资产</b>——导入、标记合作、查看维护；「<b>合作人脉</b>」为标记合作落点、「<b>穿透项目</b>」为直接人脉项目预览（限量20条）。<b>间接穿透 / 多路径 / 人脉商机流 / 可能认识的人</b>为<b>尊享版</b>能力（升级入口见穿透项目页底部）。</span>
+        <button onclick="document.getElementById('req-note').style.display='none'" class="ml-auto text-blue-400 hover:text-blue-600 flex-shrink-0">收起 ×</button>
+      </div>
+
+      <!-- 数据看板（标准版现有样式） -->
+      <div class="rounded-xl overflow-hidden border border-gray-200 flex mb-3">
+        <div class="flex-1 bg-blue-900 p-3.5 flex items-center gap-4">
+          <div>
+            <div class="text-blue-200 text-[12px] mb-0.5">🔵 我的私域人脉（已导入）</div>
+            <div class="text-white font-black text-2xl leading-none"><span id="stat-ppl">0</span> <span class="text-sm font-medium">人</span></div>
+            <div class="text-blue-300 text-[12px] mt-0.5">1度直接关系 · 仅您可见</div>
+          </div>
+          <div class="border-l border-blue-700 pl-4 text-[12px] text-blue-200 space-y-1">
+            <div>📍 覆盖企业 <span class="text-white font-bold" id="stat-co">0</span> 家</div>
+            <div>🔒 数据私有，绝不外泄</div>
+          </div>
+        </div>
+        <div class="w-px bg-gray-300"></div>
+        <div class="flex-1 bg-green-900 p-3.5 flex items-center gap-4">
+          <div>
+            <div class="text-green-200 text-[12px] mb-0.5">🟢 系统挖掘推荐（公域）</div>
+            <div class="text-white font-black text-2xl leading-none">1436 <span class="text-sm font-medium">人</span></div>
+            <div class="text-green-300 text-[12px] mt-0.5">2度+3度推算 · 中项网数据库</div>
+          </div>
+          <div class="border-l border-green-700 pl-4 text-[12px] text-green-200 space-y-1">
+            <div>🔗 2度关系 <span class="text-white font-bold">524人</span></div>
+            <div>🔗 3度关系 <span class="text-white font-bold">912人</span></div>
+          </div>
+        </div>
+        <div class="w-px bg-gray-300"></div>
+        <div class="bg-white p-3 flex flex-col justify-center items-center gap-2 w-40">
+          <button onclick="openModal('modal-import')" class="w-full bg-blue-600 text-white text-[13px] py-1.5 rounded font-medium hover:bg-blue-700">📥 我的人脉导入</button>
+          <div class="text-[12px] text-gray-400 text-center leading-snug">导入更多人脉可解锁<br>更多2度突破路径</div>
+        </div>
+      </div>
+
+      <!-- Tab 行：人（现有4个）｜合作人脉 ‖ 穿透项目 -->
+      <div class="flex gap-2 items-end flex-wrap">
+        <div class="main-tab active" onclick="switchTab(this,'all')">全部 (<span class="cnt" data-c="all">0</span>)</div>
+        <div class="main-tab" onclick="switchTab(this,'private')">我的私域 (<span class="cnt" data-c="private">0</span>)</div>
+        <div class="main-tab" onclick="switchTab(this,'rec')">系统推荐 (<span class="cnt" data-c="rec">0</span>)</div>
+        <div class="main-tab" onclick="switchTab(this,'ai')">AI突破路径 (<span class="cnt" data-c="ai">0</span>)</div>
+        <span class="w-px h-6 bg-gray-300 mx-1 mb-1"></span>
+        <div class="main-tab" onclick="switchTab(this,'coop')">🤝 合作人脉 (<span class="cnt" data-c="coop">0</span>)</div>
+        <span class="w-px h-6 bg-gray-300 mx-1 mb-1"></span>
+        <div class="main-tab locktab" onclick="switchTab(this,'proj')">🔗 穿透项目 🔒</div>
+      </div>
+    </div>
+
+    <section class="p-5 pt-4">
+      <div class="bg-white rounded-lg border border-gray-200">
+        <div id="tab-head" class="px-4 py-2.5 border-b border-gray-100 text-[12px] text-gray-400"></div>
+        <div id="tab-body" class="divide-y divide-gray-50"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== 导入弹窗（与尊享版一致的写入能力） ===== -->
+<div id="modal-import" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl w-[560px] max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200" style="background:linear-gradient(135deg,#0f172a,#1e3a5f)">
+      <div>
+        <div class="text-white font-bold text-sm">📥 我的人脉导入</div>
+        <div class="text-slate-400 text-[12px] mt-0.5">私域数据安全隔离，仅您可见，绝不被竞对检索</div>
+      </div>
+      <button onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white text-xl">×</button>
+    </div>
+    <div class="mx-4 mt-4 bg-green-50 border border-green-300 rounded-xl p-3 flex gap-3">
+      <span class="text-2xl flex-shrink-0">🛡️</span>
+      <div>
+        <div class="text-sm font-bold text-green-800 mb-1">数据安全承诺</div>
+        <div class="text-[13px] text-green-700 leading-relaxed space-y-0.5">
+          <div>✅ <b>数据安全隔离</b>：您的人脉数据存储在专属加密空间，与其他用户完全隔离</div>
+          <div>✅ <b>100% 私域化</b>：导入的联系人仅您本人账号可见，任何人无法访问</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 space-y-3">
+      <div class="text-[12px] text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+        <span class="text-red-500 font-medium">* 必填</span>：姓名、所在企业、手机号与微信号至少填写一项
+      </div>
+      <div id="manual-form" class="space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <input id="m-name" type="text" placeholder="姓名 *" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <input id="m-title" type="text" placeholder="职位（如：采购经理）" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input id="m-phone" type="text" placeholder="手机号 *" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <input id="m-wechat" type="text" placeholder="微信号" class="border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+        </div>
+        <div class="flex gap-2">
+          <input id="m-company" type="text" placeholder="所在企业 *" autocomplete="off" class="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-400">
+          <button onclick="onManualCompanyInput(document.getElementById('m-company').value)" class="bg-blue-500 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-600 whitespace-nowrap">匹配</button>
+        </div>
+        <div id="m-match-panel" class="hidden rounded-lg border text-[13px] p-2"></div>
+        <button onclick="submitManual()" class="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700">添加联系人</button>
+      </div>
+      <div id="manual-result" class="hidden rounded-lg border p-3 text-[13px]"></div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[12px] font-medium text-gray-500">已导入私域人脉（3人）</span>
+          <span class="text-[12px] text-red-400 cursor-pointer hover:text-red-600" onclick="confirmPurge()">🗑 清除全部数据</span>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[12px] font-bold flex-shrink-0">夏</span><span class="font-medium text-gray-700">夏旭忆</span><span class="text-gray-400 flex-1">湖南攸县抽水蓄能有限公司</span><span class="text-green-600 text-[12px]">✅ 已关联 1个项目</span></div>
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[12px] font-bold flex-shrink-0">李</span><span class="font-medium text-gray-700">李忠孝</span><span class="text-gray-400 flex-1">大唐三门峡发电有限责任公司</span><span class="text-green-600 text-[12px]">✅ 已关联 2个项目</span></div>
+          <div class="flex items-center gap-2 text-[13px]"><span class="w-6 h-6 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-[12px] font-bold flex-shrink-0">董</span><span class="font-medium text-gray-700">董雯婷</span><span class="text-gray-400 flex-1">江苏华电昆山热电有限公司</span><span class="text-orange-500 text-[12px]">⚠️ 企业待确认</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm z-[60] opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+
+<script>
+/* ================= 平台侧边导航（标准版菜单：我的人脉管理） ================= */
+const NAV_ITEMS = [
+  {label:"找商机", icon:"🔍", sub:[]},
+  {label:"找客户", icon:"🏢", sub:["参建单位库","企业拓客","地图拓客","我的人脉管理"]},
+  {label:"找渠道", icon:"📡", sub:[]},
+  {label:"目标商机", icon:"🎯", sub:[]},
+  {label:"海外商机", icon:"🌏", sub:[]},
+  {label:"CRM", icon:"📋", sub:[]},
+  {label:"市场服务", icon:"📊", sub:[]},
+  {label:"行业研究院", icon:"🏛", sub:[]},
+];
+(function renderNav(){
+  document.getElementById('nav-list').innerHTML = NAV_ITEMS.map(item => `
+    <div class="cursor-pointer">
+      <div class="flex items-center gap-2 px-3 py-2 text-sm ${item.label==='找客户'?'text-blue-400 bg-slate-800':'text-slate-300 hover:bg-slate-800 hover:text-blue-400'}">
+        <span>${item.icon}</span><span>${item.label}</span>
+        ${item.sub.length?'<span class="ml-auto text-slate-500 text-[11px]">∨</span>':''}
+      </div>
+      ${item.label==='找客户'? item.sub.map(s=>`
+        <div class="pl-9 py-1.5 text-[13px] cursor-pointer ${s==='我的人脉管理'?'text-blue-400 bg-slate-800/60 font-medium border-l-2 border-blue-400':'text-slate-400 hover:text-blue-400'}">${s}${s==='我的人脉管理'?' <span class="text-[10px] text-amber-400 align-middle">新</span>':''}</div>
+      `).join(''):''}
+    </div>
+  `).join('');
+})();
+
+/* ================= 数据（与尊享版同源，穿透展示受限） ================= */
+let CONTACTS = [
+  {id:1,name:"夏旭忆",title:"现场负责人",company:"湖南攸县抽水蓄能有限公司",source:"private",degree:1,avatar:"夏",
+   via:"🔒 我导入的 · 导入账号 151****7366",
+   projects:[{name:"攸县广寒坪抽水蓄能电站项目",stage:"设备安装"}]},
+  {id:2,name:"李忠孝",title:"项目经理",company:"大唐三门峡发电有限责任公司",source:"private",degree:1,avatar:"李",
+   via:"🔒 我导入的 · 导入账号 151****7366",
+   projects:[{name:"大唐三门峡火电厂扩建第二台1000MW机组（三期）项目",stage:"设备安装"},{name:"大唐湖滨区磁钟风电项目",stage:"施工图设计"}]},
+  {id:3,name:"董雯婷",title:"采购主管",company:"江苏华电昆山热电有限公司",source:"private",degree:1,avatar:"董",
+   via:"🔒 我导入的 · 导入账号 151****7366",
+   projects:[{name:"江苏华电昆山二期2×45万千瓦级燃机调峰项目",stage:"初步设计"}]},
+  {id:4,name:"乐宜洲",title:"经理 · 生产部",company:"盐城市申克赛斯机械有限公司",source:"coop",degree:1,avatar:"乐",markedDate:"2026-06-09",
+   via:"🤝 合作过 · 2026-06-09 · 来源项目：年产50台套锅炉及环保设备项目",
+   projects:[{name:"年产50台套锅炉及环保设备项目",stage:"封顶后分包及装修工程"}]},
+  {id:5,name:"王卓",title:"设计总监",company:"杭州九米建筑设计有限公司",source:"coop",degree:1,avatar:"王",markedDate:"2026-09-09",
+   via:"🤝 合作过 · 2026-09-09 · 来源项目：义乌市城西街道新社区集聚开创二期项目",
+   projects:[{name:"义乌市城西街道新社区集聚开创二期项目",stage:"工程施工"},{name:"北苑街道国贸大道地块房地产项目",stage:"工程施工"}]},
+  {id:6,name:"甘先生",title:"工程部",company:"湖南攸县抽水蓄能有限公司",source:"rec",degree:2,avatar:"甘",
+   via:"🔗 可引荐 · 经由 夏旭忆（湖南攸县抽水蓄能有限公司）",projects:[]},
+  {id:7,name:"李明",title:"采购总监",company:"国网新源控股",source:"rec",degree:2,avatar:"李",
+   via:"🔗 可引荐 · 经由 夏旭忆（攸县抽蓄）→ 项目合作方",projects:[]},
+  {id:8,name:"陈总",title:"副总经理",company:"中国电建华东院",source:"rec",degree:2,avatar:"陈",
+   via:"🔗 可引荐 · 经由 李忠孝（大唐三门峡）→ 设计合作",projects:[]},
+  {id:9,name:"王海",title:"项目负责人",company:"射阳县特庸镇人民政府",source:"rec",degree:3,avatar:"王",
+   via:"🔗 可引荐 · 经由 乐宜洲（申克赛斯）→ 王海",projects:[]},
+  {id:10,name:"赵工",title:"技术主任",company:"PT PLN",source:"rec",degree:3,avatar:"赵",
+   via:"🔗 可引荐 · 经由 陈总（华东院）→ 葛洲坝合作方",projects:[]},
+];
+const srcConf = {
+  private:{label:'🔒 私域·1度',cls:'bg-blue-50 border-blue-200 text-blue-700',row:'degree-1'},
+  coop:{label:'🤝 已合作',cls:'bg-red-50 border-red-200 text-red-700',row:'marked-row'},
+  rec:{label:'🟢 系统推荐',cls:'bg-green-50 border-green-200 text-green-700',row:''},
+};
+let COMPANIES = [
+  {id:1,name:"杭州九米建筑设计有限公司",alias:"又名：杭州绿城九米建筑设计有限公司",markedDate:"2026-09-09",total:156,active:4},
+  {id:2,name:"上海裕目商业管理有限公司",alias:"",markedDate:"2025-08-18",total:37,active:2},
+];
+/* 穿透项目：仅直接（标准版权限）；间接部分仅用于锁定态计数 */
+let PROJECTS_DIRECT = [
+  {id:1,title:"义乌市城西街道新社区集聚开创二期项目",owner:"义乌自由贸易发展区管理委员会",ver:"v.10",date:"2026-09-09",region:"浙江省/金华市",stage:"工程施工",invest:"98000万",via:"王卓 先生 · 设计总监（九米设计）"},
+  {id:2,title:"北苑街道国贸大道与丹溪北路交叉口西北侧地块房地产项目",owner:"义乌市绣湖置业有限公司",ver:"v.6",date:"2026-09-08",region:"浙江省/金华市",stage:"工程施工",invest:"76000万",via:"王卓 先生 · 设计总监（九米设计）"},
+  {id:3,title:"攸县广寒坪抽水蓄能电站项目",owner:"湖南攸县抽水蓄能有限公司",ver:"v.16",date:"2026-09-09",region:"湖南省/株洲市",stage:"设备安装",invest:"760000万",via:"夏旭忆 · 现场负责人（我导入的）"},
+  {id:4,title:"年产50台套锅炉及环保设备项目",owner:"盐城市申克赛斯机械有限公司",ver:"v.1",date:"2026-08-17",region:"江苏省/盐城市",stage:"封顶后分包及装修工程",invest:"12000万",via:"乐宜洲 先生（经理）· 生产部"},
+  {id:5,title:"虹口喜来登酒店4层局部、6-15层局部翻新装修工程（EPC）（五星级）",owner:"上海裕目商业管理有限公司",ver:"v.2",date:"2026-07-28",region:"上海市/虹口区",stage:"封顶后分包及装修工程",invest:"8500万",via:"吴晓东 先生 · 工程总监（上海裕目）"},
+];
+const INDIRECT_LOCKED_COUNT = 4;   /* 间接穿透项目数（尊享版解锁） */
+const INDIRECT_LOCKED_TITLES = ["浙江省人才大厦项目（模糊）","年产200台智能粮食烘干机制造项目（模糊）","杭钢单元GS1304-03地块公租房项目(EPC)（模糊）"];
+
+/* ================= 渲染 ================= */
+let curTab = 'all';
+function switchTab(el, t){
+  curTab = t;
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function updateCounts(){
+  const c = {
+    all: CONTACTS.length,
+    private: CONTACTS.filter(x=>x.source==='private').length,
+    rec: CONTACTS.filter(x=>x.source==='rec').length,
+    ai: CONTACTS.filter(x=>x.source==='rec'&&x.degree===2).length,
+    coop: CONTACTS.filter(x=>x.source==='coop').length + COMPANIES.length,
+  };
+  document.querySelectorAll('.cnt').forEach(s=>s.textContent = c[s.dataset.c]);
+  const mine = CONTACTS.filter(x=>x.source!=='rec');
+  document.getElementById('stat-ppl').textContent = mine.length;
+  const cos = new Set(mine.map(x=>x.company)); COMPANIES.forEach(co=>cos.add(co.name));
+  document.getElementById('stat-co').textContent = cos.size;
+}
+const HEADS = {
+  all:'人脉总览：🔒 我导入的 ＋ 🤝 已合作 ＋ 🟢 系统推荐（标准版与尊享版数据互通）',
+  private:'通过「我的人脉导入」写入的联系人，1度直接关系、仅您可见',
+  rec:'基于项目参建数据推算的 2/3 度人脉候选（标记合作后转入资产）',
+  ai:'AI 计算的最短突破路径推荐（2度关系优先）',
+  coop:'🤝 标记合作的管理落点：合作联系人＋合作企业（取消合作在此操作）',
+  proj:'🔗 直接人脉参与的项目（标准版限量 20 条）——间接穿透为尊享版能力',
+};
+function render(){
+  document.getElementById('tab-head').textContent = HEADS[curTab];
+  const body = document.getElementById('tab-body');
+  if (curTab==='proj'){ body.innerHTML = renderProjects(); return; }
+  let list;
+  if (curTab==='coop'){ body.innerHTML = coopRows(); return; }
+  if (curTab==='private') list = CONTACTS.filter(c=>c.source==='private');
+  else if (curTab==='rec') list = CONTACTS.filter(c=>c.source==='rec');
+  else if (curTab==='ai') list = CONTACTS.filter(c=>c.source==='rec'&&c.degree===2);
+  else list = CONTACTS;
+  body.innerHTML = list.map(contactRow).join('') || emptyRow('暂无该类人脉');
+}
+function emptyRow(t){ return `<div class="p-10 text-center text-gray-400 text-sm">${t}</div>`; }
+function contactRow(c){
+  const s = srcConf[c.source];
+  const tags = c.projects.map(p=>`<span class="inline-flex items-center text-[12px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">🏗 ${p.name}</span>`).join('');
+  const act = c.source==='coop'
+    ? `<button onclick="unmarkContact(${c.id})" class="text-[12px] border border-red-200 text-red-500 px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap">取消合作</button>`
+    : `<button onclick="removeContact(${c.id})" class="text-[12px] border border-gray-200 text-gray-400 px-2 py-1 rounded hover:border-red-300 hover:text-red-500 whitespace-nowrap">删除</button>`;
+  return `<div class="p-3 hover:bg-blue-50/40 transition-all ${s.row}">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-bold flex-shrink-0">${c.avatar}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+          <span class="text-sm font-semibold text-gray-900">${c.name}</span>
+          <span class="text-[12px] text-gray-500">${c.title}</span>
+          <span class="text-[12px] font-medium ${s.cls} border px-1.5 py-0.5 rounded-full">${s.label}</span>
+        </div>
+        <div class="text-[13px] text-blue-600 mb-1">${c.company}</div>
+        <div class="text-[12px] text-gray-400 mb-1">🔗 ${c.via}</div>
+        <div class="flex gap-1 flex-wrap">${tags}</div>
+      </div>
+      <div class="flex gap-1 items-start flex-shrink-0">${act}</div>
+    </div>
+  </div>`;
+}
+function coopRows(){
+  const cRows = CONTACTS.filter(c=>c.source==='coop').map(contactRow).join('');
+  const coRows = COMPANIES.map(co=>`
+  <div class="p-3 hover:bg-blue-50/40 transition-all marked-row">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded bg-blue-100 text-blue-700 border border-blue-200 flex items-center justify-center text-sm flex-shrink-0">🏢</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+          <span class="text-sm font-semibold text-gray-900">${co.name}</span>
+          <span class="text-[12px] font-medium bg-red-50 border-red-200 text-red-700 border px-1.5 py-0.5 rounded-full">🤝 已合作 · 公司</span>
+        </div>
+        ${co.alias?`<div class="text-[12px] text-gray-400">（${co.alias}）</div>`:''}
+        <div class="text-[12px] text-gray-400 mt-1">🤝 合作企业 · 合作自 ${co.markedDate} · 参与项目 ${co.total} 个 · 近12个月活跃 ${co.active} 个</div>
+      </div>
+      <div class="flex gap-1 items-start flex-shrink-0">
+        <button onclick="unmarkCompany(${co.id})" class="text-[12px] border border-red-200 text-red-500 px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap">取消合作</button>
+      </div>
+    </div>
+  </div>`).join('');
+  return cRows + coRows || emptyRow('暂无合作关系——在项目详情/企业详情/联系人列表中「标记合作」后在此管理');
+}
+function renderProjects(){
+  const rows = PROJECTS_DIRECT.slice(0,20).map(p=>`
+  <div class="p-3.5 hover:bg-blue-50/40 transition-all">
+    <div class="flex items-start gap-3">
+      <span class="text-[12px] bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded font-medium flex-shrink-0 mt-0.5">直接人脉</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-[14px] font-medium text-gray-800 leading-snug hover:text-blue-700 cursor-pointer" onclick="showToast('原型演示：进入项目详情')">${p.title} <span class="text-gray-400 font-normal">(${p.owner}) ${p.ver}</span></div>
+        <div class="flex gap-3 flex-wrap text-[12px] text-gray-500 mt-1">
+          <span>发布时间：${p.date}</span><span>${p.region}</span><span>项目阶段：${p.stage}</span><span>投资额：${p.invest}</span>
+        </div>
+        <div class="text-[12px] text-gray-600 mt-1">👤 通过 <span class="text-blue-700 font-medium">${p.via}</span></div>
+      </div>
+      <button onclick="showToast('原型演示：进入项目详情')" class="text-[12px] bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700 whitespace-nowrap flex-shrink-0">查看详情</button>
+    </div>
+  </div>`).join('');
+  /* 锁定态：间接穿透（尊享版能力预告） */
+  const locked = `
+  <div class="p-4 bg-slate-50 border-t border-gray-100">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-[13px] font-bold text-gray-700">🔒 间接人脉触达的 ${INDIRECT_LOCKED_COUNT} 个项目</span>
+      <span class="text-[12px] text-gray-400">升级尊享版解锁：完整人脉商机流、路径链、可引荐关系</span>
+      <button onclick="showToast('原型演示：跳转升级页')" class="ml-auto bg-amber-500 text-white text-[13px] px-3 py-1.5 rounded hover:bg-amber-600 font-medium flex-shrink-0">升级尊享版 →</button>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      ${INDIRECT_LOCKED_TITLES.map(t=>`
+      <div class="border border-dashed border-gray-300 rounded-lg p-3 bg-white/60 relative overflow-hidden">
+        <div class="text-[12px] font-medium text-gray-700 blurred-title">${t}</div>
+        <div class="text-[11px] text-gray-400 mt-1 blurred-title">我 → 🔒 → 🔒 → 该项目</div>
+        <div class="absolute inset-0 flex items-center justify-center bg-white/40"><span class="text-2xl">🔒</span></div>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="px-4 py-3 bg-amber-50 border-t border-amber-100 text-[12px] text-amber-900 flex items-center gap-3">
+    <span class="font-bold">尊享版独享：</span>
+    <span>间接穿透（2/3度·可引荐） · 多路径聚合与路径说明 · 人脉商机推荐流（筛选/搜索） · 可能认识的人 · 商机穿透分析</span>
+  </div>`;
+  return rows + locked;
+}
+
+/* ================= 增删（与尊享版同源联动） ================= */
+function unmarkContact(id){
+  const c = CONTACTS.find(x=>x.id===id); if (!c) return;
+  if (!confirm(`确定取消与「${c.name}」的合作吗？其关联项目将从「穿透项目」移除。`)) return;
+  CONTACTS = CONTACTS.filter(x=>x.id!==id);
+  PROJECTS_DIRECT = PROJECTS_DIRECT.filter(p=>!p.via.startsWith(c.name));
+  updateCounts(); render();
+  showToast('已取消合作：合作人脉与穿透项目同步更新');
+}
+function unmarkCompany(id){
+  const co = COMPANIES.find(x=>x.id===id); if (!co) return;
+  if (!confirm(`确定取消与「${co.name}」的合作吗？`)) return;
+  COMPANIES = COMPANIES.filter(x=>x.id!==id);
+  updateCounts(); render();
+  showToast('已取消合作');
+}
+function removeContact(id){
+  const c = CONTACTS.find(x=>x.id===id); if (!c) return;
+  if (!confirm(`确定删除联系人「${c.name}」吗？`)) return;
+  CONTACTS = CONTACTS.filter(x=>x.id!==id);
+  PROJECTS_DIRECT = PROJECTS_DIRECT.filter(p=>!p.via.startsWith(c.name));
+  updateCounts(); render();
+  showToast('🗑 已删除');
+}
+
+/* ================= 导入（与尊享版一致） ================= */
+const COMPANY_MAP = {
+  '葛洲坝':[{name:'葛洲坝集团国际工程有限公司',type:'央企',c:97},{name:'中国葛洲坝集团三峡建设工程有限公司',type:'央企',c:72}],
+  '国网':[{name:'国网新源控股有限公司',type:'央企',c:88},{name:'国家电网有限公司',type:'央企',c:75}],
+  '电建':[{name:'中国电建集团华东勘测设计研究院有限公司',type:'央企',c:85}],
+  '华电':[{name:'中国华电工程（集团）有限公司',type:'央企',c:55},{name:'华电国际电力股份有限公司',type:'上市',c:48}],
+};
+let _selectedCompany = null;
+function onManualCompanyInput(val){
+  _selectedCompany = null;
+  const panel = document.getElementById('m-match-panel');
+  if (!val || val.length < 2){ showToast('请输入至少2个字符后再匹配'); return; }
+  const key = Object.keys(COMPANY_MAP).find(k => val.includes(k));
+  if (!key){
+    panel.className = 'rounded-lg border border-gray-200 bg-gray-50 text-[13px] p-2.5';
+    panel.classList.remove('hidden');
+    panel.innerHTML = `<div class="text-gray-500">未在平台企业库中找到匹配结果，您的人脉仍可以<span class="text-orange-500 font-medium">纯私域</span>状态导入。</div>`;
+    return;
+  }
+  const cands = COMPANY_MAP[key]; const top = cands[0];
+  if (top.c >= 90) _selectedCompany = top;
+  panel.className = 'rounded-lg border border-green-200 bg-green-50 text-[13px] p-2';
+  panel.classList.remove('hidden');
+  panel.innerHTML = `<div class="text-green-700 font-medium mb-1.5">✅ 已自动匹配（置信度 ${top.c}%），可修改：</div>`
+    + cands.map(c=>`
+      <label class="flex items-center gap-2 cursor-pointer hover:bg-green-100 rounded px-1 py-0.5" onclick="_selectedCompany={name:'${c.name}',type:'${c.type}',c:${c.c}}">
+        <input type="radio" name="m-company-radio" ${c===top?'checked':''} class="w-3 h-3">
+        <span class="flex-1 text-gray-700">${c.name}</span>
+        <span class="font-medium text-green-600 text-[12px]">${c.c}%</span>
+      </label>`).join('');
+}
+function submitManual(){
+  const name = document.getElementById('m-name').value.trim();
+  if (!name){ showToast('请填写姓名'); return; }
+  const phone = document.getElementById('m-phone').value.trim();
+  const wechat = document.getElementById('m-wechat').value.trim();
+  if (!phone && !wechat){ showToast('手机号和微信号至少填写一项'); return; }
+  const companyInput = document.getElementById('m-company').value.trim();
+  if (!companyInput){ showToast('请填写所在企业'); return; }
+  const result = document.getElementById('manual-result');
+  result.classList.remove('hidden');
+  result.className = 'rounded-lg border border-green-200 bg-green-50 p-3 text-[13px]';
+  result.innerHTML = `
+    <div class="flex items-center gap-2 mb-1">
+      <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">${name[0]}</span>
+      <span class="font-semibold text-gray-800">${name}</span>
+      <span class="ml-auto text-green-600 font-medium">✅ 已写入我的人脉</span>
+    </div>
+    <button onclick="resetManualForm()" class="mt-2 text-blue-600 text-[12px] hover:underline">+ 继续添加</button>`;
+  document.getElementById('manual-form').classList.add('hidden');
+}
+function resetManualForm(){
+  ['m-name','m-phone','m-wechat','m-title','m-company'].forEach(id => document.getElementById(id).value = '');
+  _selectedCompany = null;
+  document.getElementById('m-match-panel').classList.add('hidden');
+  document.getElementById('manual-result').classList.add('hidden');
+  document.getElementById('manual-form').classList.remove('hidden');
+}
+function confirmPurge(){ if (confirm('确定要清除全部私域数据吗？此操作不可恢复。')) showToast('🗑 全部私域数据已清除'); }
+
+/* ================= 通用 ================= */
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); document.body.style.overflow=''; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1'; setTimeout(()=>{ t.style.opacity='0'; }, 2000); }
+window.confirm = window.confirm; /* 保留原生确认 */
+
+updateCounts(); render();
+</script>
+</body>
+</html>
